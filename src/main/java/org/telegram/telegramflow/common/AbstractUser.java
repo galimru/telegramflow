@@ -1,17 +1,12 @@
-package org.telegram.telegramflow.defaults;
+package org.telegram.telegramflow.common;
 
-import org.telegram.telegramflow.common.AuthState;
-import org.telegram.telegramflow.common.Role;
-import org.telegram.telegramflow.common.User;
-
-public class DefaultUser implements User {
+public abstract class AbstractUser implements TelegramUser {
 
     private String userId;
     private String username;
     private String firstName;
     private String lastName;
     private AuthState authState;
-    private Role role;
     private String phone;
     private String activeScreen;
 
@@ -63,16 +58,6 @@ public class DefaultUser implements User {
     @Override
     public void setAuthState(AuthState authState) {
         this.authState = authState;
-    }
-
-    @Override
-    public Role getRole() {
-        return role;
-    }
-
-    @Override
-    public void setRole(Role role) {
-        this.role = role;
     }
 
     @Override

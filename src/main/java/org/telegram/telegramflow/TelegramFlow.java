@@ -4,7 +4,7 @@ import org.telegram.telegramflow.exceptions.AuthenticationException;
 import org.telegram.telegramflow.exceptions.InitializationException;
 import org.telegram.telegramflow.exceptions.ProcessException;
 import org.telegram.telegramflow.exceptions.ScreenRegistryException;
-import org.telegram.telegramflow.common.User;
+import org.telegram.telegramflow.common.TelegramUser;
 import org.telegram.telegramflow.defaults.DefaultScreenRegistry;
 import org.telegram.telegramflow.handlers.KeyboardAction;
 import org.telegram.telegramflow.api.ScreenRegistry;
@@ -12,7 +12,7 @@ import org.telegram.telegramflow.handlers.UpdateHandler;
 import org.telegram.telegramflow.api.AuthenticationService;
 import org.telegram.telegramflow.defaults.DefaultAuthenticationService;
 import org.telegram.telegramflow.api.TelegramBot;
-import org.telegram.telegramflow.api.UserService;
+import org.telegram.telegramflow.api.UserManager;
 import org.telegram.telegramflow.xml.ButtonDefinition;
 import org.telegram.telegramflow.xml.ButtonRowDefinition;
 import org.telegram.telegramflow.xml.ScreenDefinition;
@@ -40,7 +40,7 @@ public class TelegramFlow {
     private Logger logger = LoggerFactory.getLogger(TelegramFlow.class);
 
     private ScreenRegistry screenRegistry;
-    private UserService userService;
+    private UserManager userManager;
     private TelegramBot telegramBot;
     private AuthenticationService authenticationService;
 
@@ -67,7 +67,7 @@ public class TelegramFlow {
 
     public TelegramFlow initialize() {
         Objects.requireNonNull(screenRegistry, "screenRegistry is null");
-        Objects.requireNonNull(userService, "userService is null");
+        Objects.requireNonNull(userManager, "userManager is null");
         Objects.requireNonNull(telegramBot, "telegramBot is null");
         Objects.requireNonNull(authenticationService, "authenticationService is null");
 
@@ -77,7 +77,7 @@ public class TelegramFlow {
             throw new InitializationException("Cannot initialize screen registry", e);
         }
 
-        authenticationService.setUserService(userService);
+        authenticationService.setUserManager(userManager);
         authenticationService.setTelegramBot(telegramBot);
 
         initialized = true;
@@ -94,12 +94,12 @@ public class TelegramFlow {
         return this;
     }
 
-    public UserService getUserService() {
-        return userService;
+    public UserManager getUserManager() {
+        return userManager;
     }
 
-    public TelegramFlow setUserService(UserService userService) {
-        this.userService = userService;
+    public TelegramFlow setUserManager(UserManager userManager) {
+        this.userManager = userManager;
         return this;
     }
 
@@ -150,7 +150,7 @@ public class TelegramFlow {
 
         Objects.requireNonNull(defaultScreen, "defaultScreen is null");
 
-        User user = authenticationService.authorize(update);
+        TelegramUser user = authenticationService.authorize(update);
 
         if (update.hasMessage() && update.getMessage().hasText()
                 && update.getMessage().getText().equals(START_COMMAND)) {
@@ -188,7 +188,7 @@ public class TelegramFlow {
     }
 
     public void transitTo(String screenId, String message) throws ProcessException {
-        User user = authenticationService.getCurrentUser();
+        TelegramUser user = authenticationService.getCurrentUser();
 
         logger.info("Transiting user {} to screen {}", user.getUsername(), screenId);
 
@@ -210,7 +210,7 @@ public class TelegramFlow {
                             .setResizeKeyboard(true)
                             .setKeyboard(keyboardRows)));
             user.setActiveScreen(screen.getId());
-            userService.save(user);
+            userManager.save(user);
         } catch (TelegramApiException e) {
             throw new ProcessException("An error occurred while sending telegram message", e);
         }
@@ -218,7 +218,7 @@ public class TelegramFlow {
 
     private void invokeHandler(Update update, Class<? extends UpdateHandler> handlerClass) throws ProcessException {
         Preconditions.checkNotNull(handlerClass, "handlerClass is null");
-        User user = authenticationService.getCurrentUser();
+        TelegramUser user = authenticationService.getCurrentUser();
 
         logger.info("Invoking handler {} by user {}", handlerClass.getSimpleName(), user.getUsername());
 
@@ -239,7 +239,7 @@ public class TelegramFlow {
     }
 
     private void executeAction(Update update, ButtonDefinition button) throws ProcessException {
-        User user = authenticationService.getCurrentUser();
+        TelegramUser user = authenticationService.getCurrentUser();
 
         logger.info("Executing action {} by user {}", button.getName(), user.getUsername());
 
@@ -252,7 +252,7 @@ public class TelegramFlow {
 
     private void invokeAction(Update update, Class<? extends KeyboardAction> actionClass) throws ProcessException {
         Objects.requireNonNull(actionClass, "actionClass is null");
-        User user = authenticationService.getCurrentUser();
+        TelegramUser user = authenticationService.getCurrentUser();
 
         logger.info("Invoking action {} by user {}", actionClass.getSimpleName(), user.getUsername());
 

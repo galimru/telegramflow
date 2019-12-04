@@ -1,6 +1,6 @@
 package org.telegram.telegramflow.common;
 
-public interface User {
+public interface TelegramUser {
 
     String getUserId();
 
@@ -22,9 +22,9 @@ public interface User {
 
     void setAuthState(AuthState authState);
 
-    Role getRole();
+    TelegramRole getRole();
 
-    void setRole(Role role);
+    void setRole(TelegramRole role);
 
     String getPhone();
 

@@ -2,17 +2,17 @@ package org.telegram.telegramflow.api;
 
 import org.telegram.telegramflow.exceptions.AuthenticationException;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegramflow.common.User;
+import org.telegram.telegramflow.common.TelegramUser;
 
 public interface AuthenticationService {
 
-    void setUserService(UserService userService);
+    void setUserManager(UserManager userManager);
 
     void setTelegramBot(TelegramBot telegramBot);
 
-    User authorize(Update update) throws AuthenticationException;
+    TelegramUser authorize(Update update) throws AuthenticationException;
 
-    User getCurrentUser();
+    TelegramUser getCurrentUser();
 
-    void logout(User user);
+    void logout(TelegramUser user);
 }

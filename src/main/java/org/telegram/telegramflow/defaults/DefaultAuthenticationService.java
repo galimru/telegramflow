@@ -2,11 +2,11 @@ package org.telegram.telegramflow.defaults;
 
 import org.telegram.telegramflow.api.AuthenticationService;
 import org.telegram.telegramflow.api.TelegramBot;
-import org.telegram.telegramflow.api.UserService;
+import org.telegram.telegramflow.api.UserManager;
 import org.telegram.telegramflow.exceptions.AuthenticationException;
 import org.telegram.telegramflow.common.AuthState;
-import org.telegram.telegramflow.common.Role;
-import org.telegram.telegramflow.common.User;
+import org.telegram.telegramflow.common.TelegramRole;
+import org.telegram.telegramflow.common.TelegramUser;
 import org.telegram.telegramflow.utils.TelegramUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,9 +32,9 @@ public class DefaultAuthenticationService implements AuthenticationService {
     private final static String DEFAULT_AUTHORIZED_MESSAGE = "Authorized";
     private final static String DEFAULT_RESTRICTED_MESSAGE = "Restricted";
 
-    private final static ThreadLocal<User> CURRENT_USER = new ThreadLocal<>();
+    private final static ThreadLocal<TelegramUser> CURRENT_USER = new ThreadLocal<>();
 
-    private UserService userService;
+    private UserManager userService;
 
     private TelegramBot telegramBot;
 
@@ -46,7 +46,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
 
     private String restrictedMessage = DEFAULT_RESTRICTED_MESSAGE;
 
-    private Consumer<User> afterAuthorized = (user) -> {
+    private Consumer<TelegramUser> afterAuthorized = (user) -> {
         try {
             telegramBot.execute(new SendMessage()
                     .setChatId(String.valueOf(user.getUserId()))
@@ -57,7 +57,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
         }
     };
 
-    private Consumer<User> afterRestricted = (user) -> {
+    private Consumer<TelegramUser> afterRestricted = (user) -> {
         try {
             telegramBot.execute(new SendMessage()
                     .setChatId(String.valueOf(user.getUserId()))
@@ -72,14 +72,14 @@ public class DefaultAuthenticationService implements AuthenticationService {
     public DefaultAuthenticationService() {
     }
 
-    public DefaultAuthenticationService(UserService userService, TelegramBot telegramBot) {
+    public DefaultAuthenticationService(UserManager userService, TelegramBot telegramBot) {
         this.userService = userService;
         this.telegramBot = telegramBot;
     }
 
     @Override
-    public void setUserService(UserService userService) {
-        this.userService = userService;
+    public void setUserManager(UserManager userManager) {
+        this.userService = userManager;
     }
 
     @Override
@@ -107,19 +107,19 @@ public class DefaultAuthenticationService implements AuthenticationService {
         return this;
     }
 
-    public DefaultAuthenticationService setAfterAuthorized(Consumer<User> afterAuthorized) {
+    public DefaultAuthenticationService setAfterAuthorized(Consumer<TelegramUser> afterAuthorized) {
         this.afterAuthorized = afterAuthorized;
         return this;
     }
 
-    public DefaultAuthenticationService setAfterRestricted(Consumer<User> afterRestricted) {
+    public DefaultAuthenticationService setAfterRestricted(Consumer<TelegramUser> afterRestricted) {
         this.afterRestricted = afterRestricted;
         return this;
     }
 
     @Override
-    public User authorize(Update update) throws AuthenticationException {
-        User user = retrieveUser(TelegramUtil.extractFrom(update));
+    public TelegramUser authorize(Update update) throws AuthenticationException {
+        TelegramUser user = retrieveUser(TelegramUtil.extractFrom(update));
 
         if (user.getAuthState() == null) {
             startAuthorizationProcess(user);
@@ -164,12 +164,12 @@ public class DefaultAuthenticationService implements AuthenticationService {
     }
 
     @Override
-    public User getCurrentUser() {
+    public TelegramUser getCurrentUser() {
         return CURRENT_USER.get();
     }
 
     @Override
-    public void logout(User user) {
+    public void logout(TelegramUser user) {
         CURRENT_USER.remove();
         user.setAuthState(null);
         userService.save(user);
@@ -177,8 +177,8 @@ public class DefaultAuthenticationService implements AuthenticationService {
         startAuthorizationProcess(user);
     }
 
-    private void assignRole(User user) throws AuthenticationException {
-        Role role = userService.retrieveRole(user);
+    private void assignRole(TelegramUser user) throws AuthenticationException {
+        TelegramRole role = userService.retrieveRole(user);
 
         if (role == null) {
             if (afterRestricted != null) {
@@ -194,10 +194,10 @@ public class DefaultAuthenticationService implements AuthenticationService {
         logger.info("Role {} matched and assigned to user {}", role, user.getUsername());
     }
 
-    private User retrieveUser(org.telegram.telegrambots.meta.api.objects.User telegramUser) {
+    private TelegramUser retrieveUser(org.telegram.telegrambots.meta.api.objects.User telegramUser) {
         Objects.requireNonNull(telegramUser, "telegramUser is null");
 
-        User user = userService.find(String.valueOf(telegramUser.getId()));
+        TelegramUser user = userService.find(String.valueOf(telegramUser.getId()));
 
         if (user == null) {
             user = userService.create();
@@ -211,13 +211,13 @@ public class DefaultAuthenticationService implements AuthenticationService {
         return user;
     }
 
-    private void startAuthorizationProcess(User user) {
+    private void startAuthorizationProcess(TelegramUser user) {
         user.setAuthState(AuthState.AUTHORIZATION);
         userService.save(user);
         sendAuthorizationRequest(user);
     }
 
-    private void sendAuthorizationRequest(User user) {
+    private void sendAuthorizationRequest(TelegramUser user) {
         KeyboardRow keyboardRow = new KeyboardRow();
         keyboardRow.add(new KeyboardButton()
                 .setRequestContact(true)
@@ -233,7 +233,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
         }
     }
 
-    private void completeAuthorizationProcess(User user) {
+    private void completeAuthorizationProcess(TelegramUser user) {
         user.setAuthState(AuthState.AUTHORIZED);
         userService.save(user);
         if (afterAuthorized != null) {

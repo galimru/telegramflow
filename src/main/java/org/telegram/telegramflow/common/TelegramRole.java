@@ -1,4 +1,4 @@
 package org.telegram.telegramflow.common;
 
-public interface Role {
+public interface TelegramRole {
 }

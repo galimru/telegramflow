@@ -2,14 +2,14 @@ package org.telegram.telegramflow;
 
 import org.junit.Test;
 import org.telegram.telegramflow.api.DummyTelegramBot;
-import org.telegram.telegramflow.api.DummyUserService;
+import org.telegram.telegramflow.api.DummyUserManager;
 
 public class TelegramFlowTest {
 
     @Test
     public void shouldBeInitializedByDefault() {
         new TelegramFlow()
-                .setUserService(new DummyUserService())
+                .setUserManager(new DummyUserManager())
                 .setTelegramBot(new DummyTelegramBot())
                 .configure()
                 .initialize();
