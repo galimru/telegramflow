@@ -290,20 +290,22 @@ public class TelegramFlow {
 
     private List<KeyboardRow> createKeyboardRows(ScreenDefinition screen) {
         List<KeyboardRow> keyboardRows = new ArrayList<>();
-        for(Object obj : screen.getButtons()) {
-            if (obj instanceof ButtonDefinition) {
-                ButtonDefinition button = (ButtonDefinition) obj;
-                KeyboardRow keyboardRow = new KeyboardRow();
-                keyboardRow.add(new KeyboardButton().setText(button.getName()));
-                keyboardRows.add(keyboardRow);
-            }
-            if (obj instanceof ButtonRowDefinition) {
-                ButtonRowDefinition buttonRow = (ButtonRowDefinition) obj;
-                KeyboardRow keyboardRow = new KeyboardRow();
-                buttonRow.getButtons().forEach(button ->
-                        keyboardRow.add(new KeyboardButton()
-                                .setText(button.getName())));
-                keyboardRows.add(keyboardRow);
+        if (screen.getButtons() != null) {
+            for (Object obj : screen.getButtons()) {
+                if (obj instanceof ButtonDefinition) {
+                    ButtonDefinition button = (ButtonDefinition) obj;
+                    KeyboardRow keyboardRow = new KeyboardRow();
+                    keyboardRow.add(new KeyboardButton().setText(button.getName()));
+                    keyboardRows.add(keyboardRow);
+                }
+                if (obj instanceof ButtonRowDefinition) {
+                    ButtonRowDefinition buttonRow = (ButtonRowDefinition) obj;
+                    KeyboardRow keyboardRow = new KeyboardRow();
+                    buttonRow.getButtons().forEach(button ->
+                            keyboardRow.add(new KeyboardButton()
+                                    .setText(button.getName())));
+                    keyboardRows.add(keyboardRow);
+                }
             }
         }
         return keyboardRows;

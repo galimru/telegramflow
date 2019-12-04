@@ -12,7 +12,7 @@ public class DummyUserService implements UserService {
     }
 
     @Override
-    public User get(String userId) {
+    public User find(String userId) {
         return new DefaultUser();
     }
 

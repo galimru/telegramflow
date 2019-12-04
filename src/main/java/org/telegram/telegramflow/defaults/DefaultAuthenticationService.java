@@ -197,7 +197,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
     private User retrieveUser(org.telegram.telegrambots.meta.api.objects.User telegramUser) {
         Objects.requireNonNull(telegramUser, "telegramUser is null");
 
-        User user = userService.get(String.valueOf(telegramUser.getId()));
+        User user = userService.find(String.valueOf(telegramUser.getId()));
 
         if (user == null) {
             user = userService.create();

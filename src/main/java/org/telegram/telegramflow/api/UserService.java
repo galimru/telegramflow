@@ -7,7 +7,7 @@ public interface UserService {
 
     User create();
 
-    User get(String userId);
+    User find(String userId);
 
     Role retrieveRole(User user);
 
