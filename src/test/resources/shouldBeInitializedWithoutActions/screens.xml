@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<screens>
+    <screen id="default" src="default.xml"/>
+</screens>
