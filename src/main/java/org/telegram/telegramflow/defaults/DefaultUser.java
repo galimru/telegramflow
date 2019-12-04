@@ -1,14 +1,18 @@
-package org.telegram.telegramflow.common;
+package org.telegram.telegramflow.defaults;
 
-public class DummyUser implements User {
+import org.telegram.telegramflow.common.AuthState;
+import org.telegram.telegramflow.common.Role;
+import org.telegram.telegramflow.common.User;
+
+public class DefaultUser implements User {
 
     private String userId;
     private String username;
     private String firstName;
     private String lastName;
-    private String phone;
-    private Role role;
     private AuthState authState;
+    private Role role;
+    private String phone;
     private String activeScreen;
 
     @Override
@@ -52,13 +56,13 @@ public class DummyUser implements User {
     }
 
     @Override
-    public String getPhone() {
-        return phone;
+    public AuthState getAuthState() {
+        return authState;
     }
 
     @Override
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setAuthState(AuthState authState) {
+        this.authState = authState;
     }
 
     @Override
@@ -72,13 +76,13 @@ public class DummyUser implements User {
     }
 
     @Override
-    public AuthState getAuthState() {
-        return authState;
+    public String getPhone() {
+        return phone;
     }
 
     @Override
-    public void setAuthState(AuthState authState) {
-        this.authState = authState;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     @Override

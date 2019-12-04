@@ -8,7 +8,7 @@ public interface AuthenticationService {
 
     void setUserService(UserService userService);
 
-    void setTelegramService(TelegramService telegramService);
+    void setTelegramBot(TelegramBot telegramBot);
 
     User authorize(Update update) throws AuthenticationException;
 

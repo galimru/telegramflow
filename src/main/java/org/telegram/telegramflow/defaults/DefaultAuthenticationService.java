@@ -1,7 +1,7 @@
 package org.telegram.telegramflow.defaults;
 
 import org.telegram.telegramflow.api.AuthenticationService;
-import org.telegram.telegramflow.api.TelegramService;
+import org.telegram.telegramflow.api.TelegramBot;
 import org.telegram.telegramflow.api.UserService;
 import org.telegram.telegramflow.exceptions.AuthenticationException;
 import org.telegram.telegramflow.common.AuthState;
@@ -36,7 +36,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
 
     private UserService userService;
 
-    private TelegramService telegramService;
+    private TelegramBot telegramBot;
 
     private String authorizeMessage = DEFAULT_AUTHORIZE_MESSAGE;
 
@@ -48,7 +48,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
 
     private Consumer<User> afterAuthorized = (user) -> {
         try {
-            telegramService.executeMethod(new SendMessage()
+            telegramBot.execute(new SendMessage()
                     .setChatId(String.valueOf(user.getUserId()))
                     .setText(authorizedMessage));
         } catch (TelegramApiException e) {
@@ -59,7 +59,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
 
     private Consumer<User> afterRestricted = (user) -> {
         try {
-            telegramService.executeMethod(new SendMessage()
+            telegramBot.execute(new SendMessage()
                     .setChatId(String.valueOf(user.getUserId()))
                     .setText(restrictedMessage)
                     .setReplyMarkup(new ReplyKeyboardRemove()));
@@ -72,9 +72,9 @@ public class DefaultAuthenticationService implements AuthenticationService {
     public DefaultAuthenticationService() {
     }
 
-    public DefaultAuthenticationService(UserService userService, TelegramService telegramService) {
+    public DefaultAuthenticationService(UserService userService, TelegramBot telegramBot) {
         this.userService = userService;
-        this.telegramService = telegramService;
+        this.telegramBot = telegramBot;
     }
 
     @Override
@@ -83,8 +83,8 @@ public class DefaultAuthenticationService implements AuthenticationService {
     }
 
     @Override
-    public void setTelegramService(TelegramService telegramService) {
-        this.telegramService = telegramService;
+    public void setTelegramBot(TelegramBot telegramBot) {
+        this.telegramBot = telegramBot;
     }
 
     public DefaultAuthenticationService setAuthorizeMessage(String authorizeMessage) {
@@ -223,7 +223,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
                 .setRequestContact(true)
                 .setText(authorizeButton));
         try {
-            telegramService.executeMethod(new SendMessage(String.valueOf(user.getUserId()), authorizeMessage)
+            telegramBot.execute(new SendMessage(String.valueOf(user.getUserId()), authorizeMessage)
                     .setReplyMarkup(new ReplyKeyboardMarkup()
                             .setResizeKeyboard(true)
                             .setKeyboard(Collections.singletonList(keyboardRow))));

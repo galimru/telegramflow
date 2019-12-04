@@ -11,7 +11,7 @@ import org.telegram.telegramflow.api.ScreenRegistry;
 import org.telegram.telegramflow.handlers.UpdateHandler;
 import org.telegram.telegramflow.api.AuthenticationService;
 import org.telegram.telegramflow.defaults.DefaultAuthenticationService;
-import org.telegram.telegramflow.api.TelegramService;
+import org.telegram.telegramflow.api.TelegramBot;
 import org.telegram.telegramflow.api.UserService;
 import org.telegram.telegramflow.xml.ButtonDefinition;
 import org.telegram.telegramflow.xml.ButtonRowDefinition;
@@ -41,7 +41,7 @@ public class TelegramFlow {
 
     private ScreenRegistry screenRegistry;
     private UserService userService;
-    private TelegramService telegramService;
+    private TelegramBot telegramBot;
     private AuthenticationService authenticationService;
 
     private boolean initialized;
@@ -68,7 +68,7 @@ public class TelegramFlow {
     public TelegramFlow initialize() {
         Objects.requireNonNull(screenRegistry, "screenRegistry is null");
         Objects.requireNonNull(userService, "userService is null");
-        Objects.requireNonNull(telegramService, "telegramService is null");
+        Objects.requireNonNull(telegramBot, "telegramBot is null");
         Objects.requireNonNull(authenticationService, "authenticationService is null");
 
         try {
@@ -78,7 +78,7 @@ public class TelegramFlow {
         }
 
         authenticationService.setUserService(userService);
-        authenticationService.setTelegramService(telegramService);
+        authenticationService.setTelegramBot(telegramBot);
 
         initialized = true;
 
@@ -103,12 +103,12 @@ public class TelegramFlow {
         return this;
     }
 
-    public TelegramService getTelegramService() {
-        return telegramService;
+    public TelegramBot getTelegramBot() {
+        return telegramBot;
     }
 
-    public TelegramFlow setTelegramService(TelegramService telegramService) {
-        this.telegramService = telegramService;
+    public TelegramFlow setTelegramBot(TelegramBot telegramBot) {
+        this.telegramBot = telegramBot;
         return this;
     }
 
@@ -203,7 +203,7 @@ public class TelegramFlow {
 
         List<KeyboardRow> keyboardRows = createKeyboardRows(screen);
         try {
-            telegramService.executeMethod(new SendMessage()
+            telegramBot.execute(new SendMessage()
                     .setChatId(String.valueOf(user.getUserId()))
                     .setText(message)
                     .setReplyMarkup(new ReplyKeyboardMarkup()
