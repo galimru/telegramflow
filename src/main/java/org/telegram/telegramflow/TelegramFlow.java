@@ -203,7 +203,7 @@ public class TelegramFlow {
 
         List<KeyboardRow> keyboardRows = createKeyboardRows(screen);
         try {
-            telegramService.execute(new SendMessage()
+            telegramService.executeMethod(new SendMessage()
                     .setChatId(String.valueOf(user.getUserId()))
                     .setText(message)
                     .setReplyMarkup(new ReplyKeyboardMarkup()

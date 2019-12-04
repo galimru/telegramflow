@@ -5,5 +5,5 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 public interface TelegramService {
 
-    void execute(BotApiMethod method) throws TelegramApiException;
+    void executeMethod(BotApiMethod method) throws TelegramApiException;
 }

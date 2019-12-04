@@ -48,7 +48,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
 
     private Consumer<User> afterAuthorized = (user) -> {
         try {
-            telegramService.execute(new SendMessage()
+            telegramService.executeMethod(new SendMessage()
                     .setChatId(String.valueOf(user.getUserId()))
                     .setText(authorizedMessage));
         } catch (TelegramApiException e) {
@@ -59,7 +59,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
 
     private Consumer<User> afterRestricted = (user) -> {
         try {
-            telegramService.execute(new SendMessage()
+            telegramService.executeMethod(new SendMessage()
                     .setChatId(String.valueOf(user.getUserId()))
                     .setText(restrictedMessage)
                     .setReplyMarkup(new ReplyKeyboardRemove()));
@@ -223,7 +223,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
                 .setRequestContact(true)
                 .setText(authorizeButton));
         try {
-            telegramService.execute(new SendMessage(String.valueOf(user.getUserId()), authorizeMessage)
+            telegramService.executeMethod(new SendMessage(String.valueOf(user.getUserId()), authorizeMessage)
                     .setReplyMarkup(new ReplyKeyboardMarkup()
                             .setResizeKeyboard(true)
                             .setKeyboard(Collections.singletonList(keyboardRow))));
