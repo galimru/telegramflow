@@ -1,5 +1,7 @@
 package org.telegram.telegramflow;
 
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegramflow.exceptions.AuthenticationException;
 import org.telegram.telegramflow.exceptions.InitializationException;
 import org.telegram.telegramflow.exceptions.ProcessException;
@@ -201,14 +203,21 @@ public class TelegramFlow {
             message = screen.getMessage();
         }
 
+        ReplyKeyboard replyKeyboard;
         List<KeyboardRow> keyboardRows = createKeyboardRows(screen);
+        if (keyboardRows.isEmpty()) {
+            replyKeyboard = new ReplyKeyboardRemove();
+        } else {
+            replyKeyboard = new ReplyKeyboardMarkup()
+                    .setResizeKeyboard(true)
+                    .setKeyboard(keyboardRows);
+        }
+
         try {
             telegramBot.execute(new SendMessage()
                     .setChatId(String.valueOf(user.getUserId()))
                     .setText(message)
-                    .setReplyMarkup(new ReplyKeyboardMarkup()
-                            .setResizeKeyboard(true)
-                            .setKeyboard(keyboardRows)));
+                    .setReplyMarkup(replyKeyboard));
             user.setActiveScreen(screen.getId());
             userManager.save(user);
         } catch (TelegramApiException e) {

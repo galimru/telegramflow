@@ -27,7 +27,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
 
     private Logger logger = LoggerFactory.getLogger(DefaultAuthenticationService.class);
 
-    private final static String DEFAULT_AUTHORIZE_MESSAGE = "Please share your phone to authorize";
+    private final static String DEFAULT_AUTHORIZE_MESSAGE = "Share your phone";
     private final static String DEFAULT_AUTHORIZE_BUTTON = "Share phone";
     private final static String DEFAULT_AUTHORIZED_MESSAGE = "Authorized";
     private final static String DEFAULT_RESTRICTED_MESSAGE = "Restricted";
