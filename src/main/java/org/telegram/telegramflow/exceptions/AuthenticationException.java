@@ -2,6 +2,10 @@ package org.telegram.telegramflow.exceptions;
 
 public class AuthenticationException extends Exception {
 
+    public AuthenticationException(Throwable cause) {
+        super(cause);
+    }
+
     public AuthenticationException(String message) {
         super(message);
     }

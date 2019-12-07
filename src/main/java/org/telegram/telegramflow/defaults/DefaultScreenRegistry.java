@@ -3,9 +3,12 @@ package org.telegram.telegramflow.defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegramflow.api.ScreenRegistry;
+import org.telegram.telegramflow.exceptions.ProcessException;
 import org.telegram.telegramflow.exceptions.ScreenRegistryException;
 import org.telegram.telegramflow.xml.*;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -13,6 +16,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultScreenRegistry implements ScreenRegistry {
@@ -45,9 +49,16 @@ public class DefaultScreenRegistry implements ScreenRegistry {
         this.descriptorPath = descriptorPath;
     }
 
+    @Nullable
     @Override
-    public ScreenDefinition get(String screenId) {
-        return screens.get(screenId);
+    public ScreenDefinition get(@Nonnull String screenId) throws ScreenRegistryException {
+        Objects.requireNonNull(screens, "screenId is null");
+
+        ScreenDefinition definition = screens.get(screenId);
+        if (definition == null) {
+            throw new ScreenRegistryException(String.format("Screen '%s' not found in registry", screenId));
+        }
+        return definition;
     }
 
     @Override
@@ -56,18 +67,23 @@ public class DefaultScreenRegistry implements ScreenRegistry {
     }
 
     private void register(String id, String src) throws ScreenRegistryException {
+        Objects.requireNonNull(screens, "id is null");
+        Objects.requireNonNull(screens, "src is null");
+
         ScreenDefinition screen = loadScreen(src);
         screen.setId(id);
         screens.put(id, screen);
     }
 
     private ScreensDescriptor loadDescriptor(String file) throws ScreenRegistryException {
+        Objects.requireNonNull(screens, "file is null");
+
         try {
             JAXBContext context = JAXBContext.newInstance(ScreensDescriptor.class);
             Unmarshaller unmarshaller = context.createUnmarshaller();
             InputStream is = getClass().getClassLoader().getResourceAsStream(file);
             if (is == null) {
-                throw new ScreenRegistryException(String.format("Screens descriptor [%s] does not exist", file));
+                throw new ScreenRegistryException(String.format("Screens descriptor '%s' does not exist", file));
             }
             return (ScreensDescriptor) unmarshaller.unmarshal(is);
         } catch (JAXBException e) {
@@ -76,6 +92,8 @@ public class DefaultScreenRegistry implements ScreenRegistry {
     }
 
     private ScreenDefinition loadScreen(String file) throws ScreenRegistryException {
+        Objects.requireNonNull(screens, "file is null");
+
         try {
             JAXBContext context = JAXBContext.newInstance(ScreenDefinition.class);
             Unmarshaller unmarshaller = context.createUnmarshaller();
@@ -85,7 +103,7 @@ public class DefaultScreenRegistry implements ScreenRegistry {
             InputStream is = getClass().getClassLoader().getResourceAsStream(file);
             if (is == null) {
                 throw new ScreenRegistryException(
-                        String.format("Screen definition [%s] does not exist, please check %s",
+                        String.format("Screen definition '%s' does not exist, please check %s",
                                 file, descriptorPath));
             }
             return (ScreenDefinition) unmarshaller.unmarshal(is);
@@ -95,6 +113,8 @@ public class DefaultScreenRegistry implements ScreenRegistry {
     }
 
     private void validateScreen(ScreenDefinition screen) throws ScreenRegistryException {
+        Objects.requireNonNull(screens, "screen is null");
+
         if (screen.getButtons() != null) {
            for (Object button : screen.getButtons()) {
                validateButton(button);
@@ -103,6 +123,8 @@ public class DefaultScreenRegistry implements ScreenRegistry {
     }
 
     private void validateButton(Object button) throws ScreenRegistryException {
+        Objects.requireNonNull(screens, "button is null");
+
         if (button instanceof ButtonDefinition) {
             ButtonDefinition definition = (ButtonDefinition) button;
             if (definition.getTransitTo() == null && definition.getAction() == null) {
@@ -112,7 +134,7 @@ public class DefaultScreenRegistry implements ScreenRegistry {
             }
             if (definition.getTransitTo() != null
                     && !screens.containsKey(definition.getTransitTo())) {
-                throw new ScreenRegistryException(String.format("Screen '%s' defined in transitTo not found [button: %s]",
+                throw new ScreenRegistryException(String.format("Screen '%s' which defined in transitTo does not exist [button: %s]",
                         definition.getTransitTo(), definition.getName()));
             }
         } else if (button instanceof ButtonRowDefinition) {
@@ -126,6 +148,8 @@ public class DefaultScreenRegistry implements ScreenRegistry {
     }
 
     private void postValidate() throws ScreenRegistryException {
+        Objects.requireNonNull(screens, "screens is null");
+
         for(ScreenDefinition screen : screens.values()) {
             validateScreen(screen);
         }

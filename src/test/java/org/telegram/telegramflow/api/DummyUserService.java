@@ -5,24 +5,27 @@ import org.telegram.telegramflow.common.DummyUser;
 import org.telegram.telegramflow.common.TelegramRole;
 import org.telegram.telegramflow.common.TelegramUser;
 
-public class DummyUserManager implements UserManager {
+import javax.annotation.Nonnull;
+
+public class DummyUserService implements UserService {
+    @Nonnull
     @Override
     public TelegramUser create() {
         return new DummyUser();
     }
 
     @Override
-    public TelegramUser find(String userId) {
+    public TelegramUser find(@Nonnull String userId) {
         return new DummyUser();
     }
 
     @Override
-    public TelegramRole retrieveRole(TelegramUser user) {
+    public TelegramRole retrieveRole(@Nonnull TelegramUser user) {
         return DummyRole.ADMIN;
     }
 
     @Override
-    public void save(TelegramUser user) {
+    public void save(@Nonnull TelegramUser user) {
         // ignore
     }
 }

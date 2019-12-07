@@ -2,6 +2,10 @@ package org.telegram.telegramflow.exceptions;
 
 public class InitializationException extends RuntimeException {
 
+    public InitializationException(Throwable cause) {
+        super(cause);
+    }
+
     public InitializationException(String message) {
         super(message);
     }
