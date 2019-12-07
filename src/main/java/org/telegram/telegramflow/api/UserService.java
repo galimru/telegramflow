@@ -1,10 +1,10 @@
 package org.telegram.telegramflow.api;
 
-import jdk.internal.jline.internal.Nullable;
 import org.telegram.telegramflow.common.TelegramRole;
 import org.telegram.telegramflow.common.TelegramUser;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public interface UserService {
 
