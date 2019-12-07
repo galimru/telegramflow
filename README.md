@@ -23,7 +23,7 @@ repositories {
 }
 ```
 
-  2. Add the Viber Bot library dependency
+  2. Add the Telegram Flow library dependency
 
 ```gradle
 implementation 'com.github.galimru:telegramflow:1.0.0'
