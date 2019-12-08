@@ -10,7 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRem
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegramflow.dummy.*;
+import org.telegram.telegramflow.api.*;
 import org.telegram.telegramflow.exceptions.AuthenticationException;
 import org.telegram.telegramflow.exceptions.InitializationException;
 import org.telegram.telegramflow.exceptions.ProcessException;

@@ -1,9 +1,9 @@
 package org.telegram.telegramflow.services;
 
-import org.telegram.telegramflow.dummy.AuthenticationService;
-import org.telegram.telegramflow.dummy.MessageService;
-import org.telegram.telegramflow.dummy.TelegramBot;
-import org.telegram.telegramflow.dummy.UserService;
+import org.telegram.telegramflow.api.AuthenticationService;
+import org.telegram.telegramflow.api.MessageService;
+import org.telegram.telegramflow.api.TelegramBot;
+import org.telegram.telegramflow.api.UserService;
 import org.telegram.telegramflow.exceptions.AuthenticationException;
 import org.telegram.telegramflow.objects.AuthState;
 import org.telegram.telegramflow.objects.TelegramRole;

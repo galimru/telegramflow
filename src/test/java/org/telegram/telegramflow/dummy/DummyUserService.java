@@ -1,5 +1,6 @@
 package org.telegram.telegramflow.dummy;
 
+import org.telegram.telegramflow.api.UserService;
 import org.telegram.telegramflow.objects.DummyRole;
 import org.telegram.telegramflow.objects.DummyUser;
 import org.telegram.telegramflow.objects.TelegramRole;

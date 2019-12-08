@@ -2,7 +2,7 @@ package org.telegram.telegramflow.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.telegram.telegramflow.dummy.ScreenRegistry;
+import org.telegram.telegramflow.api.ScreenRegistry;
 import org.telegram.telegramflow.exceptions.ScreenRegistryException;
 import org.telegram.telegramflow.xml.*;
 

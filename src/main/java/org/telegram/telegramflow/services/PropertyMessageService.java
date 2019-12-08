@@ -1,6 +1,6 @@
 package org.telegram.telegramflow.services;
 
-import org.telegram.telegramflow.dummy.MessageService;
+import org.telegram.telegramflow.api.MessageService;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;

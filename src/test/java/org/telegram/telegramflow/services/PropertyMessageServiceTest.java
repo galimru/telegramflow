@@ -2,7 +2,7 @@ package org.telegram.telegramflow.services;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.telegram.telegramflow.dummy.MessageService;
+import org.telegram.telegramflow.api.MessageService;
 
 import java.io.IOException;
 

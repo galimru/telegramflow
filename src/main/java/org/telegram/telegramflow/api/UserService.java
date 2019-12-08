@@ -1,4 +1,4 @@
-package org.telegram.telegramflow.dummy;
+package org.telegram.telegramflow.api;
 
 import org.telegram.telegramflow.objects.TelegramRole;
 import org.telegram.telegramflow.objects.TelegramUser;

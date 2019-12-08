@@ -1,4 +1,4 @@
-package org.telegram.telegramflow.dummy;
+package org.telegram.telegramflow.api;
 
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegramflow.objects.TelegramUser;
