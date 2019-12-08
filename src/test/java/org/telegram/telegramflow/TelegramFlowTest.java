@@ -1,8 +1,8 @@
 package org.telegram.telegramflow;
 
 import org.junit.Test;
-import org.telegram.telegramflow.api.DummyTelegramBot;
-import org.telegram.telegramflow.api.DummyUserService;
+import org.telegram.telegramflow.dummy.DummyTelegramBot;
+import org.telegram.telegramflow.dummy.DummyUserService;
 
 public class TelegramFlowTest {
 

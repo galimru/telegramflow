@@ -10,17 +10,18 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRem
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegramflow.api.*;
-import org.telegram.telegramflow.common.TelegramUser;
-import org.telegram.telegramflow.defaults.DefaultAuthenticationService;
-import org.telegram.telegramflow.defaults.DefaultMessageService;
-import org.telegram.telegramflow.defaults.DefaultScreenRegistry;
+import org.telegram.telegramflow.dummy.*;
 import org.telegram.telegramflow.exceptions.AuthenticationException;
 import org.telegram.telegramflow.exceptions.InitializationException;
 import org.telegram.telegramflow.exceptions.ProcessException;
 import org.telegram.telegramflow.exceptions.ScreenRegistryException;
 import org.telegram.telegramflow.handlers.KeyboardAction;
 import org.telegram.telegramflow.handlers.UpdateHandler;
+import org.telegram.telegramflow.objects.TelegramUser;
+import org.telegram.telegramflow.services.DefaultInitialScreenProvider;
+import org.telegram.telegramflow.services.PropertyMessageService;
+import org.telegram.telegramflow.services.SharePhoneAuthenticationService;
+import org.telegram.telegramflow.services.XmlScreenRegistry;
 import org.telegram.telegramflow.xml.ButtonDefinition;
 import org.telegram.telegramflow.xml.ButtonRowDefinition;
 import org.telegram.telegramflow.xml.ScreenDefinition;
@@ -35,14 +36,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class TelegramFlow {
 
-    private final static String DEFAULT_SCREEN_DESCRIPTOR_PATH = "screens.xml";
-    private final static String DEFAULT_SCREEN_ID = "default";
+    private final static String SCREENS_DESCRIPTOR_PATH = "screens.xml";
     private final static String START_COMMAND = "/start";
 
     private Logger logger = LoggerFactory.getLogger(TelegramFlow.class);
 
     private AuthenticationService authenticationService;
     private ScreenRegistry screenRegistry;
+    private InitialScreenProvider initialScreenProvider;
     private UserService userService;
     private TelegramBot telegramBot;
     private MessageService messageService;
@@ -60,14 +61,17 @@ public class TelegramFlow {
     @Nonnull
     public TelegramFlow configure() {
         if (screenRegistry == null) {
-            screenRegistry = new DefaultScreenRegistry();
-            screenRegistry.setDescriptorPath(DEFAULT_SCREEN_DESCRIPTOR_PATH);
+            screenRegistry = new XmlScreenRegistry();
+            screenRegistry.setDescriptorPath(SCREENS_DESCRIPTOR_PATH);
         }
         if (authenticationService == null) {
-            authenticationService = new DefaultAuthenticationService();
+            authenticationService = new SharePhoneAuthenticationService();
+        }
+        if (initialScreenProvider == null) {
+            initialScreenProvider = new DefaultInitialScreenProvider();
         }
         if (messageService == null) {
-            messageService = new DefaultMessageService();
+            messageService = new PropertyMessageService();
         }
         return this;
     }
@@ -75,9 +79,10 @@ public class TelegramFlow {
     @Nonnull
     public TelegramFlow initialize() {
         Objects.requireNonNull(screenRegistry, "screenRegistry is null");
+        Objects.requireNonNull(authenticationService, "authenticationService is null");
+        Objects.requireNonNull(initialScreenProvider, "initialScreenProvider is null");
         Objects.requireNonNull(userService, "userService is null");
         Objects.requireNonNull(telegramBot, "telegramBot is null");
-        Objects.requireNonNull(authenticationService, "authenticationService is null");
         Objects.requireNonNull(messageService, "messageService is null");
 
         try {
@@ -151,6 +156,16 @@ public class TelegramFlow {
         return this;
     }
 
+    public InitialScreenProvider getInitialScreenProvider() {
+        return initialScreenProvider;
+    }
+
+    @Nonnull
+    public TelegramFlow setInitialScreenProvider(@Nonnull InitialScreenProvider initialScreenProvider) {
+        this.initialScreenProvider = initialScreenProvider;
+        return this;
+    }
+
     public Class<? extends UpdateHandler> getDefaultInlineHandler() {
         return defaultInlineHandler;
     }
@@ -172,16 +187,11 @@ public class TelegramFlow {
     }
 
     public void process(@Nonnull Update update) throws AuthenticationException, ProcessException {
-        process(update, DEFAULT_SCREEN_ID);
-    }
-
-    public void process(@Nonnull Update update, @Nonnull String defaultScreen) throws AuthenticationException, ProcessException {
         if (!initialized) {
             throw new ProcessException("Telegram flow is not initialized");
         }
 
         Objects.requireNonNull(update, "update is null");
-        Objects.requireNonNull(defaultScreen, "defaultScreen is null");
 
         TelegramUser user = authenticationService.authorize(update);
 
@@ -199,7 +209,8 @@ public class TelegramFlow {
             }
             process(update, screen);
         } else {
-            transitTo(defaultScreen);
+            String initialScreen = initialScreenProvider.getInitialScreen(user);
+            transitTo(initialScreen);
         }
     }
 

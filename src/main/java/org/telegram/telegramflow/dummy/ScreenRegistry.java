@@ -1,4 +1,4 @@
-package org.telegram.telegramflow.api;
+package org.telegram.telegramflow.dummy;
 
 import org.telegram.telegramflow.exceptions.ScreenRegistryException;
 import org.telegram.telegramflow.xml.ScreenDefinition;

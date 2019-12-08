@@ -1,4 +1,4 @@
-package org.telegram.telegramflow.api;
+package org.telegram.telegramflow.dummy;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;

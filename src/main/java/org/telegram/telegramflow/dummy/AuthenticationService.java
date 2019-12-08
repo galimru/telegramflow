@@ -1,7 +1,7 @@
-package org.telegram.telegramflow.api;
+package org.telegram.telegramflow.dummy;
 
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegramflow.common.TelegramUser;
+import org.telegram.telegramflow.objects.TelegramUser;
 import org.telegram.telegramflow.exceptions.AuthenticationException;
 
 import javax.annotation.Nonnull;

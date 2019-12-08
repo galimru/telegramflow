@@ -1,4 +1,4 @@
-package org.telegram.telegramflow;
+package org.telegram.telegramflow.services;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -7,15 +7,14 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegramflow.api.AuthenticationService;
-import org.telegram.telegramflow.api.MessageService;
-import org.telegram.telegramflow.api.TelegramBot;
-import org.telegram.telegramflow.api.UserService;
-import org.telegram.telegramflow.common.AuthState;
-import org.telegram.telegramflow.common.DummyRole;
-import org.telegram.telegramflow.common.DummyUser;
-import org.telegram.telegramflow.common.TelegramUser;
-import org.telegram.telegramflow.defaults.DefaultAuthenticationService;
+import org.telegram.telegramflow.dummy.AuthenticationService;
+import org.telegram.telegramflow.dummy.MessageService;
+import org.telegram.telegramflow.dummy.TelegramBot;
+import org.telegram.telegramflow.dummy.UserService;
+import org.telegram.telegramflow.objects.AuthState;
+import org.telegram.telegramflow.objects.DummyRole;
+import org.telegram.telegramflow.objects.DummyUser;
+import org.telegram.telegramflow.objects.TelegramUser;
 import org.telegram.telegramflow.exceptions.AuthenticationException;
 import utils.JsonUtil;
 
@@ -28,7 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultAuthenticationServiceTest {
+public class SharePhoneAuthenticationServiceTest {
 
     @Mock
     private TelegramBot telegramBot;
@@ -43,7 +42,7 @@ public class DefaultAuthenticationServiceTest {
 
     @Before
     public void setup() {
-        authenticationService = new DefaultAuthenticationService();
+        authenticationService = new SharePhoneAuthenticationService();
         authenticationService.setMessageService(messageService);
         authenticationService.setTelegramBot(telegramBot);
         authenticationService.setUserService(userService);
@@ -66,7 +65,7 @@ public class DefaultAuthenticationServiceTest {
     }
 
     @Test
-    public void shouldNotThrowExceptionForAuthorizedUser() throws IOException, TelegramApiException, AuthenticationException {
+    public void shouldReturnUserForAuthorizedUser() throws IOException, TelegramApiException, AuthenticationException {
         when(userService.find(any())).thenReturn(null);
         when(userService.create()).then(i -> {
             TelegramUser user = new DummyUser();

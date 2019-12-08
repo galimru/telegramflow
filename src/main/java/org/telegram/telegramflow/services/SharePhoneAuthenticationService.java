@@ -1,13 +1,13 @@
-package org.telegram.telegramflow.defaults;
+package org.telegram.telegramflow.services;
 
-import org.telegram.telegramflow.api.AuthenticationService;
-import org.telegram.telegramflow.api.MessageService;
-import org.telegram.telegramflow.api.TelegramBot;
-import org.telegram.telegramflow.api.UserService;
+import org.telegram.telegramflow.dummy.AuthenticationService;
+import org.telegram.telegramflow.dummy.MessageService;
+import org.telegram.telegramflow.dummy.TelegramBot;
+import org.telegram.telegramflow.dummy.UserService;
 import org.telegram.telegramflow.exceptions.AuthenticationException;
-import org.telegram.telegramflow.common.AuthState;
-import org.telegram.telegramflow.common.TelegramRole;
-import org.telegram.telegramflow.common.TelegramUser;
+import org.telegram.telegramflow.objects.AuthState;
+import org.telegram.telegramflow.objects.TelegramRole;
+import org.telegram.telegramflow.objects.TelegramUser;
 import org.telegram.telegramflow.utils.TelegramUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +26,9 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class DefaultAuthenticationService implements AuthenticationService {
+public class SharePhoneAuthenticationService implements AuthenticationService {
 
-    private Logger logger = LoggerFactory.getLogger(DefaultAuthenticationService.class);
+    private Logger logger = LoggerFactory.getLogger(SharePhoneAuthenticationService.class);
 
     private final static ThreadLocal<TelegramUser> CURRENT_USER = new ThreadLocal<>();
 
@@ -61,10 +61,10 @@ public class DefaultAuthenticationService implements AuthenticationService {
         }
     };
 
-    public DefaultAuthenticationService() {
+    public SharePhoneAuthenticationService() {
     }
 
-    public DefaultAuthenticationService(UserService userService, TelegramBot telegramBot, MessageService messageService) {
+    public SharePhoneAuthenticationService(UserService userService, TelegramBot telegramBot, MessageService messageService) {
         this.userService = userService;
         this.telegramBot = telegramBot;
         this.messageService = messageService;
@@ -86,13 +86,13 @@ public class DefaultAuthenticationService implements AuthenticationService {
     }
 
     @Nonnull
-    public DefaultAuthenticationService setAfterAuthorized(@Nullable Consumer<TelegramUser> afterAuthorized) {
+    public SharePhoneAuthenticationService setAfterAuthorized(@Nullable Consumer<TelegramUser> afterAuthorized) {
         this.afterAuthorized = afterAuthorized;
         return this;
     }
 
     @Nonnull
-    public DefaultAuthenticationService setAfterRestricted(@Nullable Consumer<TelegramUser> afterRestricted) {
+    public SharePhoneAuthenticationService setAfterRestricted(@Nullable Consumer<TelegramUser> afterRestricted) {
         this.afterRestricted = afterRestricted;
         return this;
     }
@@ -100,7 +100,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
     @Nonnull
     @Override
     public TelegramUser authorize(@Nonnull Update update) throws AuthenticationException {
-        Objects.requireNonNull(update, "updated is null");
+        Objects.requireNonNull(update, "update is null");
 
         TelegramUser user = retrieveUser(TelegramUtil.extractFrom(update));
 

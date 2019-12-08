@@ -1,6 +1,6 @@
-package org.telegram.telegramflow.defaults;
+package org.telegram.telegramflow.services;
 
-import org.telegram.telegramflow.api.MessageService;
+import org.telegram.telegramflow.dummy.MessageService;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -8,7 +8,7 @@ import java.io.InputStream;
 import java.util.Objects;
 import java.util.Properties;
 
-public class DefaultMessageService implements MessageService {
+public class PropertyMessageService implements MessageService {
 
     private final static String MESSAGES_FILENAME = "/messages.properties";
 

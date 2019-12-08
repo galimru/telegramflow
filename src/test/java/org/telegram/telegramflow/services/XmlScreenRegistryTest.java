@@ -1,15 +1,15 @@
-package org.telegram.telegramflow.defaults;
+package org.telegram.telegramflow.services;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.telegram.telegramflow.api.ScreenRegistry;
+import org.telegram.telegramflow.dummy.ScreenRegistry;
 import org.telegram.telegramflow.exceptions.ScreenRegistryException;
 
-public class DefaultScreenRegistryTest {
+public class XmlScreenRegistryTest {
 
     @Test
     public void shouldBeInitializedWithEmptyDescriptor() throws ScreenRegistryException {
-        ScreenRegistry screenRegistry = new DefaultScreenRegistry();
+        ScreenRegistry screenRegistry = new XmlScreenRegistry();
         screenRegistry.setDescriptorPath("shouldBeInitializedWithEmptyDescriptor/screens.xml");
         screenRegistry.initialize();
         Assert.assertEquals(0, screenRegistry.size());
@@ -17,7 +17,7 @@ public class DefaultScreenRegistryTest {
 
     @Test
     public void shouldBeInitializedWithoutActions() throws ScreenRegistryException {
-        ScreenRegistry screenRegistry = new DefaultScreenRegistry();
+        ScreenRegistry screenRegistry = new XmlScreenRegistry();
         screenRegistry.setDescriptorPath("shouldBeInitializedWithoutActions/screens.xml");
         screenRegistry.initialize();
         Assert.assertNull(screenRegistry.get("default").getButtons());

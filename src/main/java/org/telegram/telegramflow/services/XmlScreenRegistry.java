@@ -1,14 +1,12 @@
-package org.telegram.telegramflow.defaults;
+package org.telegram.telegramflow.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.telegram.telegramflow.api.ScreenRegistry;
-import org.telegram.telegramflow.exceptions.ProcessException;
+import org.telegram.telegramflow.dummy.ScreenRegistry;
 import org.telegram.telegramflow.exceptions.ScreenRegistryException;
 import org.telegram.telegramflow.xml.*;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -19,9 +17,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DefaultScreenRegistry implements ScreenRegistry {
+public class XmlScreenRegistry implements ScreenRegistry {
 
-    private Logger logger = LoggerFactory.getLogger(DefaultScreenRegistry.class);
+    private Logger logger = LoggerFactory.getLogger(XmlScreenRegistry.class);
 
     private String descriptorPath;
     private Path relativePath;
@@ -49,7 +47,7 @@ public class DefaultScreenRegistry implements ScreenRegistry {
         this.descriptorPath = descriptorPath;
     }
 
-    @Nullable
+    @Nonnull
     @Override
     public ScreenDefinition get(@Nonnull String screenId) throws ScreenRegistryException {
         Objects.requireNonNull(screens, "screenId is null");

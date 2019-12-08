@@ -1,9 +1,9 @@
-package org.telegram.telegramflow.api;
+package org.telegram.telegramflow.dummy;
 
-import org.telegram.telegramflow.common.DummyRole;
-import org.telegram.telegramflow.common.DummyUser;
-import org.telegram.telegramflow.common.TelegramRole;
-import org.telegram.telegramflow.common.TelegramUser;
+import org.telegram.telegramflow.objects.DummyRole;
+import org.telegram.telegramflow.objects.DummyUser;
+import org.telegram.telegramflow.objects.TelegramRole;
+import org.telegram.telegramflow.objects.TelegramUser;
 
 import javax.annotation.Nonnull;
 
