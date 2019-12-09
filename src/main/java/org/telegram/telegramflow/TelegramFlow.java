@@ -18,10 +18,7 @@ import org.telegram.telegramflow.exceptions.ScreenRegistryException;
 import org.telegram.telegramflow.handlers.KeyboardAction;
 import org.telegram.telegramflow.handlers.UpdateHandler;
 import org.telegram.telegramflow.objects.TelegramUser;
-import org.telegram.telegramflow.services.DefaultInitialScreenProvider;
-import org.telegram.telegramflow.services.PropertyMessageService;
-import org.telegram.telegramflow.services.SharePhoneAuthenticationService;
-import org.telegram.telegramflow.services.XmlScreenRegistry;
+import org.telegram.telegramflow.services.*;
 import org.telegram.telegramflow.xml.ButtonDefinition;
 import org.telegram.telegramflow.xml.ButtonRowDefinition;
 import org.telegram.telegramflow.xml.ScreenDefinition;
@@ -65,7 +62,7 @@ public class TelegramFlow {
             screenRegistry.setDescriptorPath(SCREENS_DESCRIPTOR_PATH);
         }
         if (authenticationService == null) {
-            authenticationService = new SharePhoneAuthenticationService();
+            authenticationService = new AnonymousAuthenticationService();
         }
         if (initialScreenProvider == null) {
             initialScreenProvider = new DefaultInitialScreenProvider();

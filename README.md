@@ -23,10 +23,11 @@ repositories {
 }
 ```
 
-  2. Add the Telegram Flow library dependency
+  2. Add the Telegram Flow library dependency along with TelegramBots library
 
 ```gradle
 implementation 'com.github.galimru:telegramflow:1.0.0'
+implementation 'org.telegram:telegrambots:4.4.0.2'
 ```
 
 _Note: The JitPack supports both Gradle/Maven build tools, please refer to jitpack [documentation](https://jitpack.io/#galimru/telegramflow) if you want use Maven_

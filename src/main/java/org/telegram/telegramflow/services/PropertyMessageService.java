@@ -19,10 +19,12 @@ public class PropertyMessageService implements MessageService {
 
     @Override
     public void initialize() throws IOException {
-        InputStream is = getClass().getResourceAsStream(MESSAGES_FILENAME);
         properties = new Properties();
-        Reader reader = new InputStreamReader(is, Charset.defaultCharset());
-        properties.load(reader);
+        InputStream is = getClass().getResourceAsStream(MESSAGES_FILENAME);
+        if (is != null) {
+            Reader reader = new InputStreamReader(is, Charset.defaultCharset());
+            properties.load(reader);
+        }
     }
 
     @Nonnull

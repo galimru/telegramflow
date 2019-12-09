@@ -36,6 +36,16 @@ public class TelegramUtil {
         return null;
     }
 
+    @Nullable
+    public static String extractText(@Nonnull Update update) {
+        Objects.requireNonNull(update, "update is null");
+
+        if (update.hasMessage() && update.getMessage().hasText()) {
+            return update.getMessage().getText();
+        }
+        return null;
+    }
+
     @Nonnull
     public static String normalizePhone(@Nonnull String phone) {
         Objects.requireNonNull(phone, "phone is null");

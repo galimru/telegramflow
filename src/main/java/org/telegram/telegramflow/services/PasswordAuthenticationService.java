@@ -1,34 +1,34 @@
 package org.telegram.telegramflow.services;
 
-import org.telegram.telegramflow.api.AuthenticationService;
-import org.telegram.telegramflow.api.MessageService;
-import org.telegram.telegramflow.api.TelegramBot;
-import org.telegram.telegramflow.api.UserService;
-import org.telegram.telegramflow.exceptions.AuthenticationException;
-import org.telegram.telegramflow.objects.AuthState;
-import org.telegram.telegramflow.objects.TelegramRole;
-import org.telegram.telegramflow.objects.TelegramUser;
-import org.telegram.telegramflow.utils.TelegramUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Contact;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegramflow.api.AuthenticationService;
+import org.telegram.telegramflow.api.MessageService;
+import org.telegram.telegramflow.api.TelegramBot;
+import org.telegram.telegramflow.api.UserService;
+import org.telegram.telegramflow.exceptions.AuthenticationException;
+import org.telegram.telegramflow.objects.AuthState;
+import org.telegram.telegramflow.objects.TelegramUser;
+import org.telegram.telegramflow.utils.TelegramUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
-public class SharePhoneAuthenticationService implements AuthenticationService {
+public abstract class PasswordAuthenticationService implements AuthenticationService {
 
-    private Logger logger = LoggerFactory.getLogger(SharePhoneAuthenticationService.class);
+    private Logger logger = LoggerFactory.getLogger(PasswordAuthenticationService.class);
 
     private final static ThreadLocal<TelegramUser> CURRENT_USER = new ThreadLocal<>();
 
@@ -37,6 +37,8 @@ public class SharePhoneAuthenticationService implements AuthenticationService {
     private TelegramBot telegramBot;
 
     private MessageService messageService;
+
+    private Map<String, String> loginMap = new ConcurrentHashMap<>();
 
     private Consumer<TelegramUser> afterAuthorized = (user) -> {
         try {
@@ -61,10 +63,10 @@ public class SharePhoneAuthenticationService implements AuthenticationService {
         }
     };
 
-    public SharePhoneAuthenticationService() {
+    public PasswordAuthenticationService() {
     }
 
-    public SharePhoneAuthenticationService(UserService userService, TelegramBot telegramBot, MessageService messageService) {
+    public PasswordAuthenticationService(UserService userService, TelegramBot telegramBot, MessageService messageService) {
         this.userService = userService;
         this.telegramBot = telegramBot;
         this.messageService = messageService;
@@ -86,13 +88,13 @@ public class SharePhoneAuthenticationService implements AuthenticationService {
     }
 
     @Nonnull
-    public SharePhoneAuthenticationService setAfterAuthorized(@Nullable Consumer<TelegramUser> afterAuthorized) {
+    public PasswordAuthenticationService setAfterAuthorized(@Nullable Consumer<TelegramUser> afterAuthorized) {
         this.afterAuthorized = afterAuthorized;
         return this;
     }
 
     @Nonnull
-    public SharePhoneAuthenticationService setAfterRestricted(@Nullable Consumer<TelegramUser> afterRestricted) {
+    public PasswordAuthenticationService setAfterRestricted(@Nullable Consumer<TelegramUser> afterRestricted) {
         this.afterRestricted = afterRestricted;
         return this;
     }
@@ -111,29 +113,44 @@ public class SharePhoneAuthenticationService implements AuthenticationService {
         }
 
         if (user.getAuthState() == AuthState.AUTHORIZATION) {
-            Contact contact = TelegramUtil.extractContact(update);
-
-            if (contact == null) {
-                sendAuthorizationRequest(user);
+            String text = TelegramUtil.extractText(update);
+            if (text == null) {
+                sendInvalidMessage(user);
                 throw new AuthenticationException(String.format("User %s sent invalid authorization message",
                         user.getUsername()));
             }
 
-            if (!user.getUserId().equals(String.valueOf(contact.getUserID()))) {
-                sendAuthorizationRequest(user);
-                throw new AuthenticationException(String.format("Contact %s doesn't belong to user %s",
-                        contact.getPhoneNumber(), user.getUsername()));
+            if (messageService.getMessage("authentication.authorizeButton").equals(text)) {
+                sendLoginRequest(user);
+                throw new AuthenticationException(String.format("Authorization process require login for user %s",
+                        user.getUsername()));
             }
 
-            String normalizedPhone = TelegramUtil.normalizePhone(contact.getPhoneNumber());
-            user.setPhone(normalizedPhone);
+            String login = loginMap.get(user.getUserId());
+            String password;
+            if (login == null) {
+                loginMap.put(user.getUserId(), text);
+                sendPasswordRequest(user);
+                throw new AuthenticationException(String.format("Authorization process require password for user %s",
+                        user.getUsername()));
+            } else {
+                password = text;
+                loginMap.remove(user.getUserId());
+            }
 
-            assignRole(user);
-            completeAuthorizationProcess(user);
+            try {
+                login(new Credentials(user, login, password));
+                completeAuthorizationProcess(user);
+            } catch (AuthenticationException e) {
+                if (afterRestricted != null) {
+                    afterRestricted.accept(user);
+                }
+                throw e;
+            }
         }
 
         if (user.getRole() == null) {
-            sendAuthorizationRequest(user);
+            sendAuthorizationRequest(user, messageService.getMessage("authentication.authorizeMessage"));
             throw new AuthenticationException(String.format("User %s doesn't have role", user.getUsername()));
         }
 
@@ -171,24 +188,7 @@ public class SharePhoneAuthenticationService implements AuthenticationService {
         startAuthorizationProcess(user);
     }
 
-    private void assignRole(TelegramUser user) throws AuthenticationException {
-        Objects.requireNonNull(user, "user is null");
-
-        TelegramRole role = userService.retrieveRole(user);
-
-        if (role == null) {
-            if (afterRestricted != null) {
-                afterRestricted.accept(user);
-            }
-            throw new AuthenticationException(String.format("Phone %s not matched with any role for user %s",
-                    user.getPhone(), user.getUsername()));
-        }
-
-        user.setRole(role);
-        userService.save(user);
-
-        logger.info("Role {} matched and assigned to user {}", role, user.getUsername());
-    }
+    protected abstract void login(@Nonnull Credentials credentials) throws AuthenticationException;
 
     private TelegramUser retrieveUser(org.telegram.telegrambots.meta.api.objects.User telegramUser) {
         Objects.requireNonNull(telegramUser, "telegramUser is null");
@@ -212,25 +212,63 @@ public class SharePhoneAuthenticationService implements AuthenticationService {
 
         user.setAuthState(AuthState.AUTHORIZATION);
         userService.save(user);
-        sendAuthorizationRequest(user);
+        sendAuthorizationRequest(user, messageService.getMessage("authentication.authorizeMessage"));
     }
 
-    private void sendAuthorizationRequest(TelegramUser user) {
+    private void sendAuthorizationRequest(TelegramUser user, String message) {
         Objects.requireNonNull(user, "user is null");
 
         KeyboardRow keyboardRow = new KeyboardRow();
         keyboardRow.add(new KeyboardButton()
-                .setRequestContact(true)
                 .setText(messageService.getMessage("authentication.authorizeButton")));
         try {
             telegramBot.execute(new SendMessage()
                     .setChatId(user.getUserId())
-                    .setText(messageService.getMessage("authentication.authorizeMessage"))
+                    .setText(message)
                     .setReplyMarkup(new ReplyKeyboardMarkup()
                             .setResizeKeyboard(true)
                             .setKeyboard(Collections.singletonList(keyboardRow))));
         } catch (TelegramApiException e) {
             logger.error(String.format("An error occurred while sending authorization request to user %s",
+                    user.getUsername()), e);
+        }
+    }
+
+    private void sendLoginRequest(TelegramUser user) {
+        Objects.requireNonNull(user, "user is null");
+
+        try {
+            telegramBot.execute(new SendMessage()
+                    .setChatId(user.getUserId())
+                    .setText(messageService.getMessage("authentication.loginMessage")));
+        } catch (TelegramApiException e) {
+            logger.error(String.format("An error occurred while sending login request to user %s",
+                    user.getUsername()), e);
+        }
+    }
+
+    private void sendPasswordRequest(TelegramUser user) {
+        Objects.requireNonNull(user, "user is null");
+
+        try {
+            telegramBot.execute(new SendMessage()
+                    .setChatId(user.getUserId())
+                    .setText(messageService.getMessage("authentication.passwordMessage")));
+        } catch (TelegramApiException e) {
+            logger.error(String.format("An error occurred while sending password request to user %s",
+                    user.getUsername()), e);
+        }
+    }
+
+    private void sendInvalidMessage(TelegramUser user) {
+        Objects.requireNonNull(user, "user is null");
+
+        try {
+            telegramBot.execute(new SendMessage()
+                    .setChatId(user.getUserId())
+                    .setText(messageService.getMessage("authentication.invalidMessage")));
+        } catch (TelegramApiException e) {
+            logger.error(String.format("An error occurred while sending invalid message to user %s",
                     user.getUsername()), e);
         }
     }
@@ -242,6 +280,33 @@ public class SharePhoneAuthenticationService implements AuthenticationService {
         userService.save(user);
         if (afterAuthorized != null) {
             afterAuthorized.accept(user);
+        }
+    }
+
+    public static class Credentials {
+        private TelegramUser user;
+        private String login;
+        private String password;
+
+        public Credentials(TelegramUser user, String login, String password) {
+            this.user = user;
+            this.login = login;
+            this.password = password;
+        }
+
+        @Nonnull
+        public TelegramUser getUser() {
+            return user;
+        }
+
+        @Nonnull
+        public String getLogin() {
+            return login;
+        }
+
+        @Nonnull
+        public String getPassword() {
+            return password;
         }
     }
 

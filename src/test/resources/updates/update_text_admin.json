@@ -1,0 +1,11 @@
+{
+  "message": {
+    "from": {
+      "id": 1,
+      "username": "test",
+      "firstname": "test",
+      "lastname": "test"
+    },
+    "text": "admin"
+  }
+}
