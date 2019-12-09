@@ -15,6 +15,7 @@ import org.telegram.telegramflow.api.TelegramBot;
 import org.telegram.telegramflow.api.UserService;
 import org.telegram.telegramflow.exceptions.AuthenticationException;
 import org.telegram.telegramflow.objects.AuthState;
+import org.telegram.telegramflow.objects.TelegramRole;
 import org.telegram.telegramflow.objects.TelegramUser;
 import org.telegram.telegramflow.utils.TelegramUtil;
 
@@ -107,23 +108,24 @@ public abstract class PasswordAuthenticationService implements AuthenticationSer
         TelegramUser user = retrieveUser(TelegramUtil.extractFrom(update));
 
         if (user.getAuthState() == null) {
-            startAuthorizationProcess(user);
-            throw new AuthenticationException(String.format("Authorization process required for user %s",
-                    user.getUsername()));
-        }
-
-        if (user.getAuthState() == AuthState.AUTHORIZATION) {
             String text = TelegramUtil.extractText(update);
-            if (text == null) {
-                sendInvalidMessage(user);
-                throw new AuthenticationException(String.format("User %s sent invalid authorization message",
+
+            if (messageService.getMessage("authentication.authorizeButton").equals(text)) {
+                startAuthorizationProcess(user);
+                sendLoginRequest(user);
+                throw new AuthenticationException(String.format("Authorization process require login for user %s",
                         user.getUsername()));
             }
 
-            if (messageService.getMessage("authentication.authorizeButton").equals(text)) {
-                loginMap.remove(user.getUserId());
-                sendLoginRequest(user);
-                throw new AuthenticationException(String.format("Authorization process require login for user %s",
+            sendAuthorizationRequest(user, messageService.getMessage("authentication.authorizeMessage"));
+            throw new AuthenticationException(String.format("Authorization process required for user %s",
+                    user.getUsername()));
+        } else if (user.getAuthState() == AuthState.AUTHORIZATION) {
+            String text = TelegramUtil.extractText(update);
+
+            if (text == null) {
+                sendInvalidMessage(user);
+                throw new AuthenticationException(String.format("User %s sent invalid authorization message",
                         user.getUsername()));
             }
 
@@ -140,7 +142,8 @@ public abstract class PasswordAuthenticationService implements AuthenticationSer
             }
 
             try {
-                login(new Credentials(user, login, password));
+                TelegramRole role = login(new Credentials(user, login, password));
+                user.setRole(role);
                 completeAuthorizationProcess(user);
             } catch (AuthenticationException e) {
                 interruptAuthorizationProcess(user);
@@ -187,7 +190,8 @@ public abstract class PasswordAuthenticationService implements AuthenticationSer
         startAuthorizationProcess(user);
     }
 
-    protected abstract void login(@Nonnull Credentials credentials) throws AuthenticationException;
+    @Nullable
+    protected abstract TelegramRole login(@Nonnull Credentials credentials) throws AuthenticationException;
 
     private TelegramUser retrieveUser(org.telegram.telegrambots.meta.api.objects.User telegramUser) {
         Objects.requireNonNull(telegramUser, "telegramUser is null");
@@ -211,7 +215,6 @@ public abstract class PasswordAuthenticationService implements AuthenticationSer
 
         user.setAuthState(AuthState.AUTHORIZATION);
         userService.save(user);
-        sendAuthorizationRequest(user, messageService.getMessage("authentication.authorizeMessage"));
     }
 
     private void sendAuthorizationRequest(TelegramUser user, String message) {
@@ -278,6 +281,9 @@ public abstract class PasswordAuthenticationService implements AuthenticationSer
         Objects.requireNonNull(user, "user is null");
 
         user.setAuthState(AuthState.AUTHORIZED);
+        if (user.getRole() == null) {
+            user.setRole(userService.retrieveRole(user));
+        }
         userService.save(user);
         if (afterAuthorized != null) {
             afterAuthorized.accept(user);
@@ -288,6 +294,7 @@ public abstract class PasswordAuthenticationService implements AuthenticationSer
         Objects.requireNonNull(user, "user is null");
 
         user.setAuthState(null);
+        user.setRole(null);
         userService.save(user);
         if (afterRestricted != null) {
             afterRestricted.accept(user);
@@ -295,6 +302,7 @@ public abstract class PasswordAuthenticationService implements AuthenticationSer
     }
 
     public static class Credentials {
+
         private TelegramUser user;
         private String login;
         private String password;

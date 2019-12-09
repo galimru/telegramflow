@@ -15,10 +15,7 @@ import org.telegram.telegramflow.api.MessageService;
 import org.telegram.telegramflow.api.TelegramBot;
 import org.telegram.telegramflow.api.UserService;
 import org.telegram.telegramflow.exceptions.AuthenticationException;
-import org.telegram.telegramflow.objects.AuthState;
-import org.telegram.telegramflow.objects.DummyRole;
-import org.telegram.telegramflow.objects.DummyUser;
-import org.telegram.telegramflow.objects.TelegramUser;
+import org.telegram.telegramflow.objects.*;
 import utils.JsonUtil;
 
 import javax.annotation.Nonnull;
@@ -49,13 +46,12 @@ public class PasswordAuthenticationServiceTest {
     public void setup() {
         authenticationService = new PasswordAuthenticationService() {
             @Override
-            protected void login(@Nonnull Credentials credentials) throws AuthenticationException {
+            protected TelegramRole login(@Nonnull Credentials credentials) throws AuthenticationException {
                 if (credentials.getLogin().equals("admin")
                         && credentials.getPassword().equals("admin")) {
-                    credentials.getUser().setRole(DummyRole.ADMIN);
-                } else {
-                    throw new AuthenticationException("Login or password incorrect");
+                    return DummyRole.ADMIN;
                 }
+                throw new AuthenticationException("Login or password incorrect");
             }
         };
         authenticationService.setTelegramBot(telegramBot);
@@ -83,11 +79,7 @@ public class PasswordAuthenticationServiceTest {
 
     @Test
     public void shouldSendLoginRequestAfterPressingAuthorize() throws IOException, TelegramApiException {
-        when(userService.find(any())).thenAnswer(i -> {
-            TelegramUser user = new DummyUser();
-            user.setAuthState(AuthState.AUTHORIZATION);
-            return user;
-        });
+        when(userService.create()).thenReturn(new DummyUser());
         when(messageService.getMessage(any())).thenAnswer(i -> i.getArguments()[0]);
 
         Update update = JsonUtil.fromFile("/updates/update_press_authorize.json");
