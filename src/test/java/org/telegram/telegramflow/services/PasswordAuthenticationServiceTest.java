@@ -106,7 +106,6 @@ public class PasswordAuthenticationServiceTest {
     public void shouldSendPasswordRequestAfterSendingLogin() throws IOException, TelegramApiException {
         when(userService.find(any())).thenAnswer(i -> {
             TelegramUser user = new DummyUser();
-            user.setUserId("1");
             user.setAuthState(AuthState.AUTHORIZATION);
             return user;
         });
@@ -129,7 +128,6 @@ public class PasswordAuthenticationServiceTest {
     public void shouldAuthorizeAfterSendingCorrectPassword() throws IOException, TelegramApiException, AuthenticationException {
         when(userService.find(any())).thenAnswer(i -> {
             TelegramUser user = new DummyUser();
-            user.setUserId("1");
             user.setAuthState(AuthState.AUTHORIZATION);
             return user;
         });
@@ -155,7 +153,6 @@ public class PasswordAuthenticationServiceTest {
     public void shouldSendRestrictedMessageAfterSendingIncorrectPassword() throws IOException, TelegramApiException, AuthenticationException {
         when(userService.find(any())).thenAnswer(i -> {
             TelegramUser user = new DummyUser();
-            user.setUserId("1");
             user.setAuthState(AuthState.AUTHORIZATION);
             return user;
         });

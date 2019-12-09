@@ -2,13 +2,13 @@ package org.telegram.telegramflow.objects;
 
 public abstract class AbstractUser implements TelegramUser {
 
-    private String userId;
-    private String username;
-    private String firstName;
-    private String lastName;
-    private AuthState authState;
-    private String phone;
-    private String activeScreen;
+    protected String userId;
+    protected String username;
+    protected String firstName;
+    protected String lastName;
+    protected AuthState authState;
+    protected String phone;
+    protected String activeScreen;
 
     @Override
     public String getUserId() {

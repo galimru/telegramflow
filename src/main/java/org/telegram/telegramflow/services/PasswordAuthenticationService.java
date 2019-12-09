@@ -121,6 +121,7 @@ public abstract class PasswordAuthenticationService implements AuthenticationSer
             }
 
             if (messageService.getMessage("authentication.authorizeButton").equals(text)) {
+                loginMap.remove(user.getUserId());
                 sendLoginRequest(user);
                 throw new AuthenticationException(String.format("Authorization process require login for user %s",
                         user.getUsername()));
@@ -142,9 +143,7 @@ public abstract class PasswordAuthenticationService implements AuthenticationSer
                 login(new Credentials(user, login, password));
                 completeAuthorizationProcess(user);
             } catch (AuthenticationException e) {
-                if (afterRestricted != null) {
-                    afterRestricted.accept(user);
-                }
+                interruptAuthorizationProcess(user);
                 throw e;
             }
         }
@@ -240,7 +239,8 @@ public abstract class PasswordAuthenticationService implements AuthenticationSer
         try {
             telegramBot.execute(new SendMessage()
                     .setChatId(user.getUserId())
-                    .setText(messageService.getMessage("authentication.loginMessage")));
+                    .setText(messageService.getMessage("authentication.loginMessage"))
+                    .setReplyMarkup(new ReplyKeyboardRemove()));
         } catch (TelegramApiException e) {
             logger.error(String.format("An error occurred while sending login request to user %s",
                     user.getUsername()), e);
@@ -253,7 +253,8 @@ public abstract class PasswordAuthenticationService implements AuthenticationSer
         try {
             telegramBot.execute(new SendMessage()
                     .setChatId(user.getUserId())
-                    .setText(messageService.getMessage("authentication.passwordMessage")));
+                    .setText(messageService.getMessage("authentication.passwordMessage"))
+                    .setReplyMarkup(new ReplyKeyboardRemove()));
         } catch (TelegramApiException e) {
             logger.error(String.format("An error occurred while sending password request to user %s",
                     user.getUsername()), e);
@@ -283,12 +284,26 @@ public abstract class PasswordAuthenticationService implements AuthenticationSer
         }
     }
 
+    private void interruptAuthorizationProcess(TelegramUser user) {
+        Objects.requireNonNull(user, "user is null");
+
+        user.setAuthState(null);
+        userService.save(user);
+        if (afterRestricted != null) {
+            afterRestricted.accept(user);
+        }
+    }
+
     public static class Credentials {
         private TelegramUser user;
         private String login;
         private String password;
 
         public Credentials(TelegramUser user, String login, String password) {
+            Objects.requireNonNull(user, "user is null");
+            Objects.requireNonNull(login, "login is null");
+            Objects.requireNonNull(password, "password is null");
+
             this.user = user;
             this.login = login;
             this.password = password;
