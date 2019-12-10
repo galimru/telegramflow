@@ -161,6 +161,11 @@ public class SharePhoneAuthenticationService implements AuthenticationService {
     }
 
     @Override
+    public void end() {
+        CURRENT_USER.remove();
+    }
+
+    @Override
     public void logout(@Nonnull TelegramUser user) {
         Objects.requireNonNull(user, "user is null");
 

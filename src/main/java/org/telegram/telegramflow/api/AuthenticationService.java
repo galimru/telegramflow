@@ -29,5 +29,7 @@ public interface AuthenticationService {
     @Nonnull
     TelegramUser getCurrentUser();
 
+    void end();
+
     void logout(@Nonnull TelegramUser user);
 }

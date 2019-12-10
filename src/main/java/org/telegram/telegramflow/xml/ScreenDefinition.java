@@ -1,5 +1,8 @@
 package org.telegram.telegramflow.xml;
 
+import org.telegram.telegramflow.handlers.UpdateHandler;
+import org.telegram.telegramflow.objects.AbstractController;
+
 import javax.xml.bind.annotation.*;
 import java.util.List;
 
@@ -10,14 +13,17 @@ public class ScreenDefinition {
     @XmlTransient
     private String id;
 
-    @XmlElement(name = "message")
-    private String message;
+    @XmlAttribute(name = "class")
+    private Class<? extends AbstractController> controllerClass;
 
     @XmlElement(name = "inputHandler")
     private InputHandlerDefinition inputHandler;
 
     @XmlElement(name = "inlineHandler")
     private InlineHandlerDefinition inlineHandler;
+
+    @XmlElement(name = "message")
+    private String message;
 
     @XmlElementWrapper(name = "keyboard")
     @XmlElements({
@@ -32,6 +38,14 @@ public class ScreenDefinition {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Class<? extends AbstractController> getControllerClass() {
+        return controllerClass;
+    }
+
+    public void setControllerClass(Class<? extends AbstractController> controllerClass) {
+        this.controllerClass = controllerClass;
     }
 
     public String getMessage() {

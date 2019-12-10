@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.telegram.telegramflow.api.ScreenRegistry;
 import org.telegram.telegramflow.exceptions.ScreenRegistryException;
+import org.telegram.telegramflow.xml.ScreenDefinition;
 
 public class XmlScreenRegistryTest {
 
@@ -21,6 +22,19 @@ public class XmlScreenRegistryTest {
         screenRegistry.setDescriptorPath("shouldBeInitializedWithoutActions/screens.xml");
         screenRegistry.initialize();
         Assert.assertNull(screenRegistry.get("default").getButtons());
+    }
+
+    @Test
+    public void shouldLoadAllFields() throws ScreenRegistryException {
+        ScreenRegistry screenRegistry = new XmlScreenRegistry();
+        screenRegistry.setDescriptorPath("screens.xml");
+        screenRegistry.initialize();
+        ScreenDefinition definition = screenRegistry.get("spec");
+        Assert.assertNotNull(definition.getControllerClass());
+        Assert.assertNotNull(definition.getMessage());
+        Assert.assertNotNull(definition.getInlineHandler());
+        Assert.assertNotNull(definition.getInputHandler());
+        Assert.assertNotNull(definition.getButtons());
     }
 
 }
