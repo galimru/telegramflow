@@ -13,7 +13,9 @@ import org.telegram.telegramflow.exceptions.AuthenticationException;
 import org.telegram.telegramflow.utils.TelegramUtil;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public class AnonymousAuthenticationService implements AuthenticationService {
 
@@ -40,6 +42,18 @@ public class AnonymousAuthenticationService implements AuthenticationService {
     @Override
     public void setMessageService(@Nonnull MessageService messageService) {
         this.messageService = messageService;
+    }
+
+    @Nonnull
+    @Override
+    public AuthenticationService setAfterAuthorized(@Nullable Consumer<TelegramUser> afterAuthorized) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Nonnull
+    @Override
+    public AuthenticationService setAfterRestricted(@Nullable Consumer<TelegramUser> afterRestricted) {
+        throw new UnsupportedOperationException();
     }
 
     @Nonnull

@@ -86,12 +86,14 @@ public class SharePhoneAuthenticationService implements AuthenticationService {
     }
 
     @Nonnull
+    @Override
     public SharePhoneAuthenticationService setAfterAuthorized(@Nullable Consumer<TelegramUser> afterAuthorized) {
         this.afterAuthorized = afterAuthorized;
         return this;
     }
 
     @Nonnull
+    @Override
     public SharePhoneAuthenticationService setAfterRestricted(@Nullable Consumer<TelegramUser> afterRestricted) {
         this.afterRestricted = afterRestricted;
         return this;
