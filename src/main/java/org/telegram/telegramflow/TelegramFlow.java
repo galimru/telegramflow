@@ -247,8 +247,9 @@ public class TelegramFlow {
             throw new ProcessException(e);
         }
 
-        AbstractController controller = unwrapController(screen);
+        AbstractController controller = createController(screen);
 
+        controller.setup(authenticationService, telegramBot, screen);
         controller.init();
         controller.show(message);
 
@@ -282,7 +283,7 @@ public class TelegramFlow {
         handler.handle(update);
     }
 
-    private AbstractController unwrapController(ScreenDefinition screen) throws ProcessException {
+    private AbstractController createController(ScreenDefinition screen) throws ProcessException {
         Objects.requireNonNull(screen, "screen is null");
 
         Class<? extends AbstractController> controllerClass = screen.getControllerClass();
@@ -290,13 +291,15 @@ public class TelegramFlow {
             controllerClass = AbstractController.class;
         }
 
+        AbstractController controller;
         try {
             Constructor constructor = controllerClass.getConstructor();
-            return  (AbstractController)constructor.newInstance();
+            controller = (AbstractController)constructor.newInstance();
         } catch (InstantiationException | InvocationTargetException
                 | IllegalAccessException | NoSuchMethodException e) {
             throw new ProcessException("Cannot create controller " + controllerClass.getName(), e);
         }
+        return controller;
     }
 
     private void executeAction(Update update, ButtonDefinition button) throws ProcessException {

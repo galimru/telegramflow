@@ -26,15 +26,11 @@ public class AbstractController {
     protected TelegramBot telegramBot;
     protected ScreenDefinition screen;
 
-    public void setAuthenticationService(@Nonnull AuthenticationService authenticationService) {
+    public void setup(@Nonnull AuthenticationService authenticationService,
+                      @Nonnull TelegramBot telegramBot,
+                      @Nonnull ScreenDefinition screen) {
         this.authenticationService = authenticationService;
-    }
-
-    public void setTelegramBot(@Nonnull TelegramBot telegramBot) {
         this.telegramBot = telegramBot;
-    }
-
-    public void setScreen(@Nonnull ScreenDefinition screen) {
         this.screen = screen;
     }
 
