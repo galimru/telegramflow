@@ -52,11 +52,11 @@ public class XmlScreenRegistry implements ScreenRegistry {
     public ScreenDefinition get(@Nonnull String screenId) throws ScreenRegistryException {
         Objects.requireNonNull(screens, "screenId is null");
 
-        ScreenDefinition definition = screens.get(screenId);
-        if (definition == null) {
+        ScreenDefinition screen = screens.get(screenId);
+        if (screen == null) {
             throw new ScreenRegistryException(String.format("Screen '%s' not found in registry", screenId));
         }
-        return definition;
+        return screen.clone();
     }
 
     @Override

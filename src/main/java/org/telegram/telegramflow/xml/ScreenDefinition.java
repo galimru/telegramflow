@@ -1,14 +1,14 @@
 package org.telegram.telegramflow.xml;
 
-import org.telegram.telegramflow.handlers.UpdateHandler;
 import org.telegram.telegramflow.objects.AbstractController;
 
 import javax.xml.bind.annotation.*;
+import java.util.Collections;
 import java.util.List;
 
 @XmlRootElement(name = "screen")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ScreenDefinition {
+public class ScreenDefinition implements Cloneable {
 
     @XmlTransient
     private String id;
@@ -78,5 +78,25 @@ public class ScreenDefinition {
 
     public void setButtons(List buttons) {
         this.buttons = buttons;
+    }
+
+    @Override
+    public ScreenDefinition clone() {
+        ScreenDefinition clone;
+        try {
+            clone = (ScreenDefinition) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new IllegalStateException(String.format("Cannot clone screen definition %s",
+                    this), e);
+        }
+        clone.setId(id);
+        clone.setMessage(message);
+        clone.setControllerClass(controllerClass);
+        clone.setInlineHandler(inlineHandler);
+        clone.setInputHandler(inputHandler);
+        if (buttons != null) {
+            clone.setButtons(Collections.unmodifiableList(buttons));
+        }
+        return clone;
     }
 }
