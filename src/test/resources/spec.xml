@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<screen class="org.telegram.telegramflow.objects.SpecController">
+<screen controller="org.telegram.telegramflow.objects.SpecController">
     <message>test</message>
     <inlineHandler class="org.telegram.telegramflow.objects.SpecInlineHandler"/>
     <inputHandler class="org.telegram.telegramflow.objects.SpecInputHandler"/>

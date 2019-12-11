@@ -1,4 +1,4 @@
-package org.telegram.telegramflow.services;
+package org.telegram.telegramflow.services.security;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +9,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRem
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegramflow.api.AuthenticationService;
 import org.telegram.telegramflow.api.MessageService;
 import org.telegram.telegramflow.api.TelegramBot;
 import org.telegram.telegramflow.api.UserService;
@@ -25,79 +24,18 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 
-public abstract class PasswordAuthenticationService implements AuthenticationService {
+public abstract class PasswordAuthenticationService extends AbstractAuthenticationService {
 
     private Logger logger = LoggerFactory.getLogger(PasswordAuthenticationService.class);
 
-    private final static ThreadLocal<TelegramUser> CURRENT_USER = new ThreadLocal<>();
-
-    private UserService userService;
-
-    private TelegramBot telegramBot;
-
-    private MessageService messageService;
-
     private Map<String, String> loginMap = new ConcurrentHashMap<>();
-
-    private Consumer<TelegramUser> afterAuthorized = (user) -> {
-        try {
-            telegramBot.execute(new SendMessage()
-                    .setChatId(String.valueOf(user.getUserId()))
-                    .setText(messageService.getMessage("authentication.authorizedMessage")));
-        } catch (TelegramApiException e) {
-            logger.error(String.format("An error occurred while sending authorized message to user %s",
-                    user.getUsername()), e);
-        }
-    };
-
-    private Consumer<TelegramUser> afterRestricted = (user) -> {
-        try {
-            telegramBot.execute(new SendMessage()
-                    .setChatId(String.valueOf(user.getUserId()))
-                    .setText(messageService.getMessage("authentication.restrictedMessage"))
-                    .setReplyMarkup(new ReplyKeyboardRemove()));
-        } catch (TelegramApiException e) {
-            logger.error(String.format("An error occurred while sending restricted message to user %s",
-                    user.getUsername()), e);
-        }
-    };
 
     public PasswordAuthenticationService() {
     }
 
     public PasswordAuthenticationService(UserService userService, TelegramBot telegramBot, MessageService messageService) {
-        this.userService = userService;
-        this.telegramBot = telegramBot;
-        this.messageService = messageService;
-    }
-
-    @Override
-    public void setUserService(@Nonnull UserService userService) {
-        this.userService = userService;
-    }
-
-    @Override
-    public void setTelegramBot(@Nonnull TelegramBot telegramBot) {
-        this.telegramBot = telegramBot;
-    }
-
-    @Override
-    public void setMessageService(@Nonnull MessageService messageService) {
-        this.messageService = messageService;
-    }
-
-    @Nonnull
-    public PasswordAuthenticationService setAfterAuthorized(@Nullable Consumer<TelegramUser> afterAuthorized) {
-        this.afterAuthorized = afterAuthorized;
-        return this;
-    }
-
-    @Nonnull
-    public PasswordAuthenticationService setAfterRestricted(@Nullable Consumer<TelegramUser> afterRestricted) {
-        this.afterRestricted = afterRestricted;
-        return this;
+        super(userService, telegramBot, messageService);
     }
 
     @Nonnull
@@ -160,38 +98,16 @@ public abstract class PasswordAuthenticationService implements AuthenticationSer
             throw new AuthenticationException(String.format("User %s is not authorized", user.getUsername()));
         }
 
-        CURRENT_USER.set(user);
+        USER_HOLDER.set(user);
 
         logger.info("User {} successfully authorized with role {}", user.getUsername(), user.getRole());
 
         return user;
     }
 
-    @Nonnull
-    @Override
-    public TelegramUser getCurrentUser() {
-        TelegramUser currentUser = CURRENT_USER.get();
-        if (currentUser == null) {
-            throw new IllegalStateException("Current user is not defined");
-        }
-        return currentUser;
-    }
-
-    @Override
-    public void end() {
-        CURRENT_USER.remove();
-    }
-
     @Override
     public void logout(@Nonnull TelegramUser user) {
-        Objects.requireNonNull(user, "user is null");
-
-        CURRENT_USER.remove();
-        user.setRole(null);
-        user.setActiveScreen(null);
-        user.setAuthState(null);
-        userService.save(user);
-        logger.info("User {} logged out", user.getUsername());
+        super.logout(user);
         startAuthorizationProcess(user);
     }
 

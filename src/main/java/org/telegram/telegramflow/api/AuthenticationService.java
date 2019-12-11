@@ -3,7 +3,6 @@ package org.telegram.telegramflow.api;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegramflow.objects.TelegramUser;
 import org.telegram.telegramflow.exceptions.AuthenticationException;
-import org.telegram.telegramflow.services.SharePhoneAuthenticationService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -27,7 +26,7 @@ public interface AuthenticationService {
     TelegramUser authorize(@Nonnull Update update) throws AuthenticationException;
 
     @Nonnull
-    TelegramUser getCurrentUser();
+    TelegramUser getUser();
 
     void end();
 

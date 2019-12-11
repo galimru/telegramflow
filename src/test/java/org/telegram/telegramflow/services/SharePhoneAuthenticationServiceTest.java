@@ -16,6 +16,7 @@ import org.telegram.telegramflow.objects.DummyRole;
 import org.telegram.telegramflow.objects.DummyUser;
 import org.telegram.telegramflow.objects.TelegramUser;
 import org.telegram.telegramflow.exceptions.AuthenticationException;
+import org.telegram.telegramflow.services.security.SharePhoneAuthenticationService;
 import utils.JsonUtil;
 
 import java.io.IOException;

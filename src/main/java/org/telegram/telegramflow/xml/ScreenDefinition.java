@@ -13,7 +13,7 @@ public class ScreenDefinition {
     @XmlTransient
     private String id;
 
-    @XmlAttribute(name = "class")
+    @XmlAttribute(name = "controller")
     private Class<? extends AbstractController> controllerClass;
 
     @XmlElement(name = "inputHandler")

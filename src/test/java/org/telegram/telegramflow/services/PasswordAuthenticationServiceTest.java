@@ -16,6 +16,7 @@ import org.telegram.telegramflow.api.TelegramBot;
 import org.telegram.telegramflow.api.UserService;
 import org.telegram.telegramflow.exceptions.AuthenticationException;
 import org.telegram.telegramflow.objects.*;
+import org.telegram.telegramflow.services.security.PasswordAuthenticationService;
 import utils.JsonUtil;
 
 import javax.annotation.Nonnull;

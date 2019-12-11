@@ -1,15 +1,14 @@
-package org.telegram.telegramflow.services;
+package org.telegram.telegramflow.services.security;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegramflow.api.AuthenticationService;
 import org.telegram.telegramflow.api.MessageService;
 import org.telegram.telegramflow.api.TelegramBot;
 import org.telegram.telegramflow.api.UserService;
+import org.telegram.telegramflow.exceptions.AuthenticationException;
 import org.telegram.telegramflow.objects.AuthState;
 import org.telegram.telegramflow.objects.TelegramUser;
-import org.telegram.telegramflow.exceptions.AuthenticationException;
 import org.telegram.telegramflow.utils.TelegramUtil;
 
 import javax.annotation.Nonnull;
@@ -17,42 +16,26 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class AnonymousAuthenticationService implements AuthenticationService {
+public class AnonymousAuthenticationService extends AbstractAuthenticationService {
 
     private Logger logger = LoggerFactory.getLogger(AnonymousAuthenticationService.class);
 
-    private final static ThreadLocal<TelegramUser> CURRENT_USER = new ThreadLocal<>();
-
-    private UserService userService;
-
-    private TelegramBot telegramBot;
-
-    private MessageService messageService;
-
-    @Override
-    public void setUserService(@Nonnull UserService userService) {
-        this.userService = userService;
+    public AnonymousAuthenticationService() {
     }
 
-    @Override
-    public void setTelegramBot(@Nonnull TelegramBot telegramBot) {
-        this.telegramBot = telegramBot;
-    }
-
-    @Override
-    public void setMessageService(@Nonnull MessageService messageService) {
-        this.messageService = messageService;
+    public AnonymousAuthenticationService(UserService userService, TelegramBot telegramBot, MessageService messageService) {
+        super(userService, telegramBot, messageService);
     }
 
     @Nonnull
     @Override
-    public AuthenticationService setAfterAuthorized(@Nullable Consumer<TelegramUser> afterAuthorized) {
+    public AbstractAuthenticationService setAfterAuthorized(@Nullable Consumer<TelegramUser> afterAuthorized) {
         throw new UnsupportedOperationException();
     }
 
     @Nonnull
     @Override
-    public AuthenticationService setAfterRestricted(@Nullable Consumer<TelegramUser> afterRestricted) {
+    public AbstractAuthenticationService setAfterRestricted(@Nullable Consumer<TelegramUser> afterRestricted) {
         throw new UnsupportedOperationException();
     }
 
@@ -67,31 +50,11 @@ public class AnonymousAuthenticationService implements AuthenticationService {
             throw new AuthenticationException(String.format("User %s is not authorized", user.getUsername()));
         }
 
-        CURRENT_USER.set(user);
+        USER_HOLDER.set(user);
 
         logger.info("User {} successfully authorized as anonymous", user.getUsername());
 
         return user;
-    }
-
-    @Nonnull
-    @Override
-    public TelegramUser getCurrentUser() {
-        TelegramUser currentUser = CURRENT_USER.get();
-        if (currentUser == null) {
-            throw new IllegalStateException("Current user is not defined");
-        }
-        return currentUser;
-    }
-
-    @Override
-    public void end() {
-        CURRENT_USER.remove();
-    }
-
-    @Override
-    public void logout(@Nonnull TelegramUser user) {
-        throw new UnsupportedOperationException();
     }
 
     private TelegramUser retrieveUser(org.telegram.telegrambots.meta.api.objects.User telegramUser) {

@@ -15,6 +15,7 @@ import org.telegram.telegramflow.objects.AuthState;
 import org.telegram.telegramflow.objects.DummyRole;
 import org.telegram.telegramflow.objects.DummyUser;
 import org.telegram.telegramflow.objects.TelegramUser;
+import org.telegram.telegramflow.services.security.AnonymousAuthenticationService;
 import utils.JsonUtil;
 
 import java.io.IOException;
