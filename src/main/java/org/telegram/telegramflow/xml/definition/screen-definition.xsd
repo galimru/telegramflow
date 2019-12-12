@@ -26,7 +26,7 @@
     <xs:element name="row">
         <xs:complexType>
             <xs:sequence>
-                <xs:element ref="button"/>
+                <xs:element ref="button" minOccurs="1" maxOccurs="unbounded"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
