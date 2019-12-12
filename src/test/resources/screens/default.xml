@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screen xmlns="http://www.telegram.org/telegramflow/screen-definition.xsd">
+    <message>test</message>
+</screen>

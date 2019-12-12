@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screen xmlns="http://www.telegram.org/telegramflow/screen-definition.xsd">
+    <message format="MARKDOWN">test</message>
+    <input handler="org.telegram.telegramflow.handlers.FullspecInputHandler"/>
+    <callback handler="org.telegram.telegramflow.handlers.FullspecCallbackHandler"/>
+    <keyboard>
+        <button name="test" transitTo="default"/>
+        <button name="test2" action="org.telegram.telegramflow.actions.FullspecAction"/>
+    </keyboard>
+</screen>

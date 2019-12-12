@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<screen controller="org.telegram.telegramflow.objects.SpecController">
-    <message>test</message>
-    <inlineHandler class="org.telegram.telegramflow.objects.SpecInlineHandler"/>
-    <inputHandler class="org.telegram.telegramflow.objects.SpecInputHandler"/>
-    <keyboard>
-        <button name="Main" transitTo="spec"/>
-    </keyboard>
-</screen>

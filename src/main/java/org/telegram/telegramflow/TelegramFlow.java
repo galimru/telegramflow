@@ -2,25 +2,35 @@ package org.telegram.telegramflow;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegramflow.api.*;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegramflow.exceptions.AuthenticationException;
 import org.telegram.telegramflow.exceptions.InitializationException;
 import org.telegram.telegramflow.exceptions.ProcessException;
 import org.telegram.telegramflow.exceptions.ScreenRegistryException;
 import org.telegram.telegramflow.handlers.KeyboardAction;
 import org.telegram.telegramflow.handlers.UpdateHandler;
-import org.telegram.telegramflow.objects.AbstractController;
-import org.telegram.telegramflow.objects.TelegramUser;
 import org.telegram.telegramflow.services.*;
-import org.telegram.telegramflow.services.security.AnonymousAuthenticationService;
-import org.telegram.telegramflow.xml.ButtonDefinition;
-import org.telegram.telegramflow.xml.ButtonRowDefinition;
-import org.telegram.telegramflow.xml.ScreenDefinition;
+import org.telegram.telegramflow.security.Authenticator;
+import org.telegram.telegramflow.objects.TelegramUser;
+import org.telegram.telegramflow.security.AnonymousAuthenticator;
+import org.telegram.telegramflow.services.defaults.DefaultInitialScreenProvider;
+import org.telegram.telegramflow.services.defaults.DefaultMessageProvider;
+import org.telegram.telegramflow.services.defaults.DefaultScreenRegistry;
+import org.telegram.telegramflow.utils.TelegramUtil;
+import org.telegram.telegramflow.xml.definition.ButtonDefinition;
+import org.telegram.telegramflow.xml.definition.ButtonRowDefinition;
+import org.telegram.telegramflow.xml.definition.MessageDefinition;
+import org.telegram.telegramflow.xml.definition.ScreenDefinition;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -28,23 +38,22 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class TelegramFlow {
 
-    private final static String SCREENS_DESCRIPTOR_PATH = "screens.xml";
     private final static String START_COMMAND = "/start";
 
     private Logger logger = LoggerFactory.getLogger(TelegramFlow.class);
 
-    private AuthenticationService authenticationService;
+    private Authenticator authenticator;
     private ScreenRegistry screenRegistry;
     private InitialScreenProvider initialScreenProvider;
     private UserService userService;
     private TelegramBot telegramBot;
-    private MessageService messageService;
+    private MessageProvider messageProvider;
 
     private boolean initialized;
 
-    private Class<? extends UpdateHandler> defaultInlineHandler = null;
-
     private Class<? extends UpdateHandler> defaultInputHandler = null;
+
+    private Class<? extends UpdateHandler> defaultCallbackHandler = null;
 
     private final Map<Class<? extends UpdateHandler>, UpdateHandler> cachedHandlers = new ConcurrentHashMap<>();
 
@@ -53,17 +62,16 @@ public class TelegramFlow {
     @Nonnull
     public TelegramFlow configure() {
         if (screenRegistry == null) {
-            screenRegistry = new XmlScreenRegistry();
-            screenRegistry.setDescriptorPath(SCREENS_DESCRIPTOR_PATH);
+            screenRegistry = new DefaultScreenRegistry();
         }
-        if (authenticationService == null) {
-            authenticationService = new AnonymousAuthenticationService();
+        if (authenticator == null) {
+            authenticator = new AnonymousAuthenticator();
         }
         if (initialScreenProvider == null) {
             initialScreenProvider = new DefaultInitialScreenProvider();
         }
-        if (messageService == null) {
-            messageService = new PropertyMessageService();
+        if (messageProvider == null) {
+            messageProvider = new DefaultMessageProvider();
         }
         return this;
     }
@@ -71,11 +79,11 @@ public class TelegramFlow {
     @Nonnull
     public TelegramFlow initialize() {
         Objects.requireNonNull(screenRegistry, "screenRegistry is null");
-        Objects.requireNonNull(authenticationService, "authenticationService is null");
+        Objects.requireNonNull(authenticator, "authenticator is null");
         Objects.requireNonNull(initialScreenProvider, "initialScreenProvider is null");
         Objects.requireNonNull(userService, "userService is null");
         Objects.requireNonNull(telegramBot, "telegramBot is null");
-        Objects.requireNonNull(messageService, "messageService is null");
+        Objects.requireNonNull(messageProvider, "messageProvider is null");
 
         try {
             screenRegistry.initialize();
@@ -83,15 +91,9 @@ public class TelegramFlow {
             throw new InitializationException("Cannot initialize screen registry", e);
         }
 
-        try {
-            messageService.initialize();
-        } catch (IOException e) {
-            throw new InitializationException("Cannot initialize message service", e);
-        }
-
-        authenticationService.setUserService(userService);
-        authenticationService.setTelegramBot(telegramBot);
-        authenticationService.setMessageService(messageService);
+        authenticator.setUserService(userService);
+        authenticator.setTelegramBot(telegramBot);
+        authenticator.setMessageProvider(messageProvider);
 
         initialized = true;
 
@@ -128,23 +130,23 @@ public class TelegramFlow {
         return this;
     }
 
-    public MessageService getMessageService() {
-        return messageService;
+    public MessageProvider getMessageProvider() {
+        return messageProvider;
     }
 
     @Nonnull
-    public TelegramFlow setMessageService(@Nonnull MessageService messageService) {
-        this.messageService = messageService;
+    public TelegramFlow setMessageProvider(@Nonnull MessageProvider messageProvider) {
+        this.messageProvider = messageProvider;
         return this;
     }
 
-    public AuthenticationService getAuthenticationService() {
-        return authenticationService;
+    public Authenticator getAuthenticator() {
+        return authenticator;
     }
 
     @Nonnull
-    public TelegramFlow setAuthenticationService(@Nonnull AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
+    public TelegramFlow setAuthenticator(@Nonnull Authenticator authenticator) {
+        this.authenticator = authenticator;
         return this;
     }
 
@@ -158,16 +160,6 @@ public class TelegramFlow {
         return this;
     }
 
-    public Class<? extends UpdateHandler> getDefaultInlineHandler() {
-        return defaultInlineHandler;
-    }
-
-    @Nonnull
-    public TelegramFlow setDefaultInlineHandler(@Nullable Class<? extends UpdateHandler> defaultInlineHandler) {
-        this.defaultInlineHandler = defaultInlineHandler;
-        return this;
-    }
-
     public Class<? extends UpdateHandler> getDefaultInputHandler() {
         return defaultInputHandler;
     }
@@ -178,6 +170,16 @@ public class TelegramFlow {
         return this;
     }
 
+    public Class<? extends UpdateHandler> getDefaultCallbackHandler() {
+        return defaultCallbackHandler;
+    }
+
+    @Nonnull
+    public TelegramFlow setDefaultCallbackHandler(@Nullable Class<? extends UpdateHandler> defaultCallbackHandler) {
+        this.defaultCallbackHandler = defaultCallbackHandler;
+        return this;
+    }
+
     public void process(@Nonnull Update update) throws AuthenticationException, ProcessException {
         if (!initialized) {
             throw new ProcessException("Telegram flow is not initialized");
@@ -185,10 +187,10 @@ public class TelegramFlow {
 
         Objects.requireNonNull(update, "update is null");
 
-        TelegramUser user = authenticationService.authorize(update);
+        TelegramUser user = authenticator.authorize(update);
         try {
-            if (update.hasMessage() && update.getMessage().hasText()
-                    && update.getMessage().getText().equals(START_COMMAND)) {
+            String text = TelegramUtil.extractText(update);
+            if (START_COMMAND.equals(text)) {
                 user.setActiveScreen(null);
             }
             if (user.getActiveScreen() != null) {
@@ -204,7 +206,7 @@ public class TelegramFlow {
                 transitTo(initialScreen);
             }
         } finally {
-            authenticationService.end();
+            authenticator.end();
         }
     }
 
@@ -218,12 +220,12 @@ public class TelegramFlow {
             String text = update.getMessage().getText();
             ButtonDefinition button = buttons.get(text);
             executeAction(update, button);
-        } else if (update.hasCallbackQuery() && screen.getInlineHandler() != null) {
-            invokeHandler(update, screen.getInlineHandler().getHandlerClass());
-        } else if (update.hasCallbackQuery() && defaultInlineHandler != null) {
-            invokeHandler(update, defaultInlineHandler);
-        } else if (screen.getInputHandler() != null) {
-            invokeHandler(update, screen.getInputHandler().getHandlerClass());
+        } else if (update.hasCallbackQuery() && screen.getCallback() != null) {
+            invokeHandler(update, screen.getCallback().getHandlerClass());
+        } else if (update.hasCallbackQuery() && defaultCallbackHandler != null) {
+            invokeHandler(update, defaultCallbackHandler);
+        } else if (screen.getInput() != null) {
+            invokeHandler(update, screen.getInput().getHandlerClass());
         } else if (defaultInputHandler != null) {
             invokeHandler(update, defaultInputHandler);
         }
@@ -236,7 +238,7 @@ public class TelegramFlow {
     public void transitTo(@Nonnull String screenId, @Nullable String message) throws ProcessException {
         Objects.requireNonNull(screenId, "screenId is null");
 
-        TelegramUser user = authenticationService.getUser();
+        TelegramUser user = authenticator.getUser();
 
         logger.info("Transiting user {} to screen {}", user.getUsername(), screenId);
 
@@ -247,23 +249,17 @@ public class TelegramFlow {
             throw new ProcessException(e);
         }
 
-        AbstractController controller = createController(screen);
-
-        controller.setup(authenticationService, telegramBot, screen);
-        controller.init();
-        controller.show(message);
+        show(message, screen);
 
         user.setActiveScreen(screen.getId());
         userService.save(user);
-
-        controller.ready();
     }
 
     private void invokeHandler(Update update, Class<? extends UpdateHandler> handlerClass) throws ProcessException {
         Objects.requireNonNull(update, "update is null");
         Objects.requireNonNull(handlerClass, "handlerClass is null");
 
-        TelegramUser user = authenticationService.getUser();
+        TelegramUser user = authenticator.getUser();
 
         logger.info("Invoking handler {} by user {}", handlerClass.getSimpleName(), user.getUsername());
 
@@ -283,30 +279,11 @@ public class TelegramFlow {
         handler.handle(update);
     }
 
-    private AbstractController createController(ScreenDefinition screen) throws ProcessException {
-        Objects.requireNonNull(screen, "screen is null");
-
-        Class<? extends AbstractController> controllerClass = screen.getControllerClass();
-        if (controllerClass == null) {
-            controllerClass = AbstractController.class;
-        }
-
-        AbstractController controller;
-        try {
-            Constructor constructor = controllerClass.getConstructor();
-            controller = (AbstractController)constructor.newInstance();
-        } catch (InstantiationException | InvocationTargetException
-                | IllegalAccessException | NoSuchMethodException e) {
-            throw new ProcessException("Cannot create controller " + controllerClass.getName(), e);
-        }
-        return controller;
-    }
-
     private void executeAction(Update update, ButtonDefinition button) throws ProcessException {
         Objects.requireNonNull(update, "update is null");
         Objects.requireNonNull(button, "button is null");
 
-        TelegramUser user = authenticationService.getUser();
+        TelegramUser user = authenticator.getUser();
 
         logger.info("Executing action {} by user {}", button.getName(), user.getUsername());
 
@@ -321,7 +298,7 @@ public class TelegramFlow {
         Objects.requireNonNull(update, "update is null");
         Objects.requireNonNull(actionClass, "actionClass is null");
 
-        TelegramUser user = authenticationService.getUser();
+        TelegramUser user = authenticator.getUser();
 
         logger.info("Invoking action {} by user {}", actionClass.getSimpleName(), user.getUsername());
 
@@ -359,6 +336,68 @@ public class TelegramFlow {
             }
         }
         return buttons;
+    }
+
+
+    private void show(@Nullable String text, ScreenDefinition screen) throws ProcessException {
+        MessageDefinition message = screen.getMessage();
+
+        if (text == null) {
+            text = message.getText();
+        }
+
+        ReplyKeyboard replyKeyboard;
+        List<KeyboardRow> keyboardRows = createKeyboardRows(screen);
+        if (keyboardRows.isEmpty()) {
+            replyKeyboard = new ReplyKeyboardRemove();
+        } else {
+            replyKeyboard = new ReplyKeyboardMarkup()
+                    .setResizeKeyboard(true)
+                    .setKeyboard(keyboardRows);
+        }
+
+        TelegramUser user = authenticator.getUser();
+
+        String parseMode = null;
+        if (message.getFormat() != null) {
+            parseMode = message.getFormat().name();
+        }
+
+        try {
+            telegramBot.execute(new SendMessage()
+                    .setChatId(String.valueOf(user.getUserId()))
+                    .setText(text)
+                    .setParseMode(parseMode)
+                    .setReplyMarkup(replyKeyboard));
+        } catch (TelegramApiException e) {
+            throw new ProcessException("An error occurred while sending telegram message", e);
+        }
+    }
+
+    @Nonnull
+    private List<KeyboardRow> createKeyboardRows(@Nonnull ScreenDefinition screen) {
+        Objects.requireNonNull(screen, "screen is null");
+
+        List<KeyboardRow> keyboardRows = new ArrayList<>();
+        if (screen.getButtons() != null) {
+            for (Object obj : screen.getButtons()) {
+                if (obj instanceof ButtonDefinition) {
+                    ButtonDefinition button = (ButtonDefinition) obj;
+                    KeyboardRow keyboardRow = new KeyboardRow();
+                    keyboardRow.add(new KeyboardButton().setText(button.getName()));
+                    keyboardRows.add(keyboardRow);
+                }
+                if (obj instanceof ButtonRowDefinition) {
+                    ButtonRowDefinition buttonRow = (ButtonRowDefinition) obj;
+                    KeyboardRow keyboardRow = new KeyboardRow();
+                    buttonRow.getButtons().forEach(button ->
+                            keyboardRow.add(new KeyboardButton()
+                                    .setText(button.getName())));
+                    keyboardRows.add(keyboardRow);
+                }
+            }
+        }
+        return keyboardRows;
     }
 
 }
