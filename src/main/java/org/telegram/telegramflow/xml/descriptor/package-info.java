@@ -1,5 +1,5 @@
 @XmlSchema(
-        namespace = "http://www.telegram.org/telegramflow/screen-descriptor.xsd",
+        namespace = "http://www.telegram.org/telegramflow/screens-descriptor.xsd",
         elementFormDefault = XmlNsForm.QUALIFIED
 )
 package org.telegram.telegramflow.xml.descriptor;

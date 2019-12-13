@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<screens xmlns="http://www.telegram.org/telegramflow/screen-descriptor.xsd">
+<screens xmlns="http://www.telegram.org/telegramflow/screens-descriptor.xsd">
     <screen id="default" src="screens/default.xml"/>
     <screen id="fullspec" src="screens/fullspec.xml"/>
 </screens>
