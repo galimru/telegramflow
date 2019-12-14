@@ -5,8 +5,8 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.telegram.telegramflow.exceptions.ScreenRegistryException;
 import org.telegram.telegramflow.services.defaults.DefaultScreenRegistry;
-import org.telegram.telegramflow.xml.definition.ButtonDefinition;
-import org.telegram.telegramflow.xml.definition.ScreenDefinition;
+import org.telegram.telegramflow.xml.screens.definition.ButtonDefinition;
+import org.telegram.telegramflow.xml.screens.definition.ScreenDefinition;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

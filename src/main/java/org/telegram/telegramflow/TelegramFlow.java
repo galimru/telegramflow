@@ -16,18 +16,18 @@ import org.telegram.telegramflow.exceptions.ProcessException;
 import org.telegram.telegramflow.exceptions.ScreenRegistryException;
 import org.telegram.telegramflow.handlers.KeyboardAction;
 import org.telegram.telegramflow.handlers.UpdateHandler;
-import org.telegram.telegramflow.services.*;
-import org.telegram.telegramflow.security.Authenticator;
 import org.telegram.telegramflow.objects.TelegramUser;
 import org.telegram.telegramflow.security.AnonymousAuthenticator;
+import org.telegram.telegramflow.security.Authenticator;
+import org.telegram.telegramflow.services.*;
 import org.telegram.telegramflow.services.defaults.DefaultInitialScreenProvider;
 import org.telegram.telegramflow.services.defaults.DefaultMessageProvider;
 import org.telegram.telegramflow.services.defaults.DefaultScreenRegistry;
 import org.telegram.telegramflow.utils.TelegramUtil;
-import org.telegram.telegramflow.xml.definition.ButtonDefinition;
-import org.telegram.telegramflow.xml.definition.ButtonRowDefinition;
-import org.telegram.telegramflow.xml.definition.MessageDefinition;
-import org.telegram.telegramflow.xml.definition.ScreenDefinition;
+import org.telegram.telegramflow.xml.screens.definition.ButtonDefinition;
+import org.telegram.telegramflow.xml.screens.definition.ButtonRowDefinition;
+import org.telegram.telegramflow.xml.screens.definition.MessageDefinition;
+import org.telegram.telegramflow.xml.screens.definition.ScreenDefinition;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -51,9 +51,9 @@ public class TelegramFlow {
 
     private boolean initialized;
 
-    private Class<? extends UpdateHandler> defaultInputHandler = null;
+    private UpdateHandler defaultInputHandler = null;
 
-    private Class<? extends UpdateHandler> defaultCallbackHandler = null;
+    private UpdateHandler defaultCallbackHandler = null;
 
     private final Map<Class<? extends UpdateHandler>, UpdateHandler> cachedHandlers = new ConcurrentHashMap<>();
 
@@ -160,22 +160,22 @@ public class TelegramFlow {
         return this;
     }
 
-    public Class<? extends UpdateHandler> getDefaultInputHandler() {
+    public UpdateHandler getDefaultInputHandler() {
         return defaultInputHandler;
     }
 
     @Nonnull
-    public TelegramFlow setDefaultInputHandler(@Nullable Class<? extends UpdateHandler> defaultInputHandler) {
+    public TelegramFlow setDefaultInputHandler(@Nullable UpdateHandler defaultInputHandler) {
         this.defaultInputHandler = defaultInputHandler;
         return this;
     }
 
-    public Class<? extends UpdateHandler> getDefaultCallbackHandler() {
+    public UpdateHandler getDefaultCallbackHandler() {
         return defaultCallbackHandler;
     }
 
     @Nonnull
-    public TelegramFlow setDefaultCallbackHandler(@Nullable Class<? extends UpdateHandler> defaultCallbackHandler) {
+    public TelegramFlow setDefaultCallbackHandler(@Nullable UpdateHandler defaultCallbackHandler) {
         this.defaultCallbackHandler = defaultCallbackHandler;
         return this;
     }
@@ -214,20 +214,33 @@ public class TelegramFlow {
         Objects.requireNonNull(update, "update is null");
         Objects.requireNonNull(screen, "screen is null");
 
+        TelegramUser user = authenticator.getUser();
+
         Map<String, ButtonDefinition> buttons = getButtons(screen);
         if (update.hasMessage() && update.getMessage().hasText()
                 && buttons.containsKey(update.getMessage().getText())) {
             String text = update.getMessage().getText();
             ButtonDefinition button = buttons.get(text);
+            logger.info("Executing action {} by user {}", button.getName(), user.getUsername());
             executeAction(update, button);
         } else if (update.hasCallbackQuery() && screen.getCallback() != null) {
+            Class<? extends UpdateHandler> handlerClass = screen.getCallback().getHandlerClass();
+            logger.info("Invoking callback handler {} by user {}",
+                    handlerClass.getSimpleName(), user.getUsername());
             invokeHandler(update, screen.getCallback().getHandlerClass());
         } else if (update.hasCallbackQuery() && defaultCallbackHandler != null) {
-            invokeHandler(update, defaultCallbackHandler);
+            logger.info("Invoking default callback handler {} by user {}",
+                    defaultCallbackHandler.getClass().getSimpleName(), user.getUsername());
+            defaultCallbackHandler.handle(update);
         } else if (screen.getInput() != null) {
+            Class<? extends UpdateHandler> handlerClass = screen.getInput().getHandlerClass();
+            logger.info("Invoking input handler {} by user {}",
+                    handlerClass.getSimpleName(), user.getUsername());
             invokeHandler(update, screen.getInput().getHandlerClass());
         } else if (defaultInputHandler != null) {
-            invokeHandler(update, defaultInputHandler);
+            logger.info("Invoking default input handler {} by user {}",
+                    defaultCallbackHandler.getClass().getSimpleName(), user.getUsername());
+            defaultInputHandler.handle(update);
         }
     }
 
@@ -259,10 +272,6 @@ public class TelegramFlow {
         Objects.requireNonNull(update, "update is null");
         Objects.requireNonNull(handlerClass, "handlerClass is null");
 
-        TelegramUser user = authenticator.getUser();
-
-        logger.info("Invoking handler {} by user {}", handlerClass.getSimpleName(), user.getUsername());
-
         UpdateHandler handler;
         if (cachedHandlers.containsKey(handlerClass)) {
             handler = cachedHandlers.get(handlerClass);
@@ -282,10 +291,6 @@ public class TelegramFlow {
     private void executeAction(Update update, ButtonDefinition button) throws ProcessException {
         Objects.requireNonNull(update, "update is null");
         Objects.requireNonNull(button, "button is null");
-
-        TelegramUser user = authenticator.getUser();
-
-        logger.info("Executing action {} by user {}", button.getName(), user.getUsername());
 
         if (button.getAction() != null) {
             invokeAction(update, button.getAction());

@@ -1,4 +1,4 @@
-package org.telegram.telegramflow.xml.descriptor;
+package org.telegram.telegramflow.xml.screens.descriptor;
 
 import javax.xml.bind.annotation.*;
 import java.util.List;

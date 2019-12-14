@@ -1,4 +1,4 @@
-package org.telegram.telegramflow.xml.definition;
+package org.telegram.telegramflow.xml.screens.definition;
 
 import org.telegram.telegramflow.handlers.UpdateHandler;
 

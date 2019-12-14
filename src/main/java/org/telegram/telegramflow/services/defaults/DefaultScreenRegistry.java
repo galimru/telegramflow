@@ -4,11 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegramflow.exceptions.ScreenRegistryException;
 import org.telegram.telegramflow.services.ScreenRegistry;
-import org.telegram.telegramflow.xml.definition.ButtonDefinition;
-import org.telegram.telegramflow.xml.definition.ButtonRowDefinition;
-import org.telegram.telegramflow.xml.definition.ScreenDefinition;
-import org.telegram.telegramflow.xml.descriptor.ScreenIndex;
-import org.telegram.telegramflow.xml.descriptor.ScreensDescriptor;
+import org.telegram.telegramflow.xml.screens.definition.ButtonDefinition;
+import org.telegram.telegramflow.xml.screens.definition.ButtonRowDefinition;
+import org.telegram.telegramflow.xml.screens.definition.ScreenDefinition;
+import org.telegram.telegramflow.xml.screens.descriptor.ScreenIndex;
+import org.telegram.telegramflow.xml.screens.descriptor.ScreensDescriptor;
 
 import javax.annotation.Nonnull;
 import javax.xml.bind.JAXBContext;
@@ -59,7 +59,7 @@ public class DefaultScreenRegistry implements ScreenRegistry {
     @Nonnull
     @Override
     public ScreenDefinition get(@Nonnull String screenId) throws ScreenRegistryException {
-        Objects.requireNonNull(screens, "screenId is null");
+        Objects.requireNonNull(screenId, "screenId is null");
 
         ScreenDefinition screen = screens.get(screenId);
         if (screen == null) {
@@ -74,8 +74,8 @@ public class DefaultScreenRegistry implements ScreenRegistry {
     }
 
     private void register(String id, String src) throws ScreenRegistryException {
-        Objects.requireNonNull(screens, "id is null");
-        Objects.requireNonNull(screens, "src is null");
+        Objects.requireNonNull(id, "id is null");
+        Objects.requireNonNull(src, "src is null");
 
         ScreenDefinition screen = loadScreen(src);
         screen.setId(id);
@@ -83,7 +83,7 @@ public class DefaultScreenRegistry implements ScreenRegistry {
     }
 
     private ScreensDescriptor loadDescriptor(String file) throws ScreenRegistryException {
-        Objects.requireNonNull(screens, "file is null");
+        Objects.requireNonNull(file, "file is null");
 
         try {
             JAXBContext context = JAXBContext.newInstance(ScreensDescriptor.class);
@@ -99,7 +99,7 @@ public class DefaultScreenRegistry implements ScreenRegistry {
     }
 
     private ScreenDefinition loadScreen(String file) throws ScreenRegistryException {
-        Objects.requireNonNull(screens, "file is null");
+        Objects.requireNonNull(file, "file is null");
 
         try {
             JAXBContext context = JAXBContext.newInstance(ScreenDefinition.class);
@@ -120,7 +120,7 @@ public class DefaultScreenRegistry implements ScreenRegistry {
     }
 
     private void validateScreen(ScreenDefinition screen) throws ScreenRegistryException {
-        Objects.requireNonNull(screens, "screen is null");
+        Objects.requireNonNull(screen, "screen is null");
 
         if (screen.getInput() != null && screen.getInput().getHandlerClass() == null) {
             throw new ScreenRegistryException(String.format("Input handler must have valid handler class [screen: %s]",
@@ -140,7 +140,7 @@ public class DefaultScreenRegistry implements ScreenRegistry {
     }
 
     private void validateButton(Object button) throws ScreenRegistryException {
-        Objects.requireNonNull(screens, "button is null");
+        Objects.requireNonNull(button, "button is null");
 
         if (button instanceof ButtonDefinition) {
             ButtonDefinition definition = (ButtonDefinition) button;
