@@ -73,6 +73,12 @@ public class TelegramFlow {
         if (messageProvider == null) {
             messageProvider = new DefaultMessageProvider();
         }
+        if (defaultInputHandler != null) {
+            defaultInputHandler.setTelegramFlow(this);
+        }
+        if (defaultCallbackHandler != null) {
+            defaultCallbackHandler.setTelegramFlow(this);
+        }
         return this;
     }
 
@@ -94,14 +100,6 @@ public class TelegramFlow {
         authenticator.setUserService(userService);
         authenticator.setTelegramBot(telegramBot);
         authenticator.setMessageProvider(messageProvider);
-
-        if (defaultInputHandler != null) {
-            defaultInputHandler.setTelegramFlow(this);
-        }
-
-        if (defaultCallbackHandler != null) {
-            defaultCallbackHandler.setTelegramFlow(this);
-        }
 
         initialized = true;
 

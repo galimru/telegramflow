@@ -1,6 +1,7 @@
 package org.telegram.telegramflow.services;
 
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegramflow.TelegramFlow;
 import org.telegram.telegramflow.exceptions.ProcessException;
 import org.telegram.telegramflow.handlers.CallbackAction;
 import org.telegram.telegramflow.handlers.UpdateHandler;
@@ -40,6 +41,13 @@ public class CallbackService {
     }
 
     public class CallbackHandler extends UpdateHandler {
+
+        @Override
+        public void setTelegramFlow(TelegramFlow telegramFlow) {
+            actions.values().forEach(action -> {
+                action.setTelegramFlow(telegramFlow);
+            });
+        }
 
         @Override
         public void handle(Update update) throws ProcessException {
