@@ -3,7 +3,7 @@ package org.telegram.telegramflow.actions;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegramflow.handlers.CallbackAction;
 
-public class HelpCallbackAction implements CallbackAction {
+public class HelpCallbackAction extends CallbackAction {
 
     public static final String KEY = "HELP";
 

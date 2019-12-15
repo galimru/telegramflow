@@ -1,9 +1,16 @@
 package org.telegram.telegramflow.handlers;
 
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegramflow.TelegramFlow;
 import org.telegram.telegramflow.exceptions.ProcessException;
 
-public interface KeyboardAction {
+public abstract class KeyboardAction {
 
-    void execute(Update update) throws ProcessException;
+    protected TelegramFlow telegramFlow;
+
+    public void setTelegramFlow(TelegramFlow telegramFlow) {
+        this.telegramFlow = telegramFlow;
+    }
+
+    public abstract void execute(Update update) throws ProcessException;
 }

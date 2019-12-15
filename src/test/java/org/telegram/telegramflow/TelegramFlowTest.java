@@ -10,7 +10,7 @@ import org.telegram.telegramflow.dummy.DummyRole;
 import org.telegram.telegramflow.dummy.DummyUser;
 import org.telegram.telegramflow.exceptions.AuthenticationException;
 import org.telegram.telegramflow.exceptions.ProcessException;
-import org.telegram.telegramflow.handlers.CallbackHandler;
+import org.telegram.telegramflow.handlers.CallbackService;
 import org.telegram.telegramflow.objects.AuthState;
 import org.telegram.telegramflow.objects.TelegramUser;
 import org.telegram.telegramflow.services.TelegramBot;
@@ -45,8 +45,9 @@ public class TelegramFlowTest {
         TelegramFlow telegramFlow = new TelegramFlow()
                 .setUserService(userService)
                 .setTelegramBot(telegramBot)
-                .setDefaultCallbackHandler(new CallbackHandler()
-                        .register(HelpCallbackAction.KEY, new HelpCallbackAction()))
+                .setDefaultCallbackHandler(new CallbackService()
+                        .register(HelpCallbackAction.KEY, new HelpCallbackAction())
+                        .createHandler())
                 .configure()
                 .initialize();
 
