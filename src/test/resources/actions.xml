@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<actions xmlns="http://www.telegram.org/telegramflow/actions-descriptor.xsd">
-    <action key="HELP" class="org.telegram.telegramflow.actions.HelpCallbackAction"/>
-</actions>

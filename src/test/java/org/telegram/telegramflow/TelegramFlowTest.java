@@ -5,11 +5,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegramflow.actions.HelpCallbackAction;
 import org.telegram.telegramflow.dummy.DummyRole;
 import org.telegram.telegramflow.dummy.DummyUser;
 import org.telegram.telegramflow.exceptions.AuthenticationException;
 import org.telegram.telegramflow.exceptions.ProcessException;
-import org.telegram.telegramflow.handlers.DefaultCallbackHandler;
+import org.telegram.telegramflow.handlers.CallbackHandler;
 import org.telegram.telegramflow.objects.AuthState;
 import org.telegram.telegramflow.objects.TelegramUser;
 import org.telegram.telegramflow.services.TelegramBot;
@@ -44,7 +45,8 @@ public class TelegramFlowTest {
         TelegramFlow telegramFlow = new TelegramFlow()
                 .setUserService(userService)
                 .setTelegramBot(telegramBot)
-                .setDefaultCallbackHandler(new DefaultCallbackHandler())
+                .setDefaultCallbackHandler(new CallbackHandler()
+                        .register(HelpCallbackAction.KEY, new HelpCallbackAction()))
                 .configure()
                 .initialize();
 

@@ -1,4 +1,4 @@
-package org.telegram.telegramflow.xml.screens.definition;
+package org.telegram.telegramflow.xml.screendefinition;
 
 import org.telegram.telegramflow.handlers.UpdateHandler;
 
@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class CallbackDefinition {
+public class InputDefinition {
 
     @XmlAttribute(name = "handler", required = true)
     private Class<? extends UpdateHandler> handlerClass;

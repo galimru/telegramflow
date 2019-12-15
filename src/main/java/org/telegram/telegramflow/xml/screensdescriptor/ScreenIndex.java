@@ -1,4 +1,4 @@
-package org.telegram.telegramflow.xml.screens.descriptor;
+package org.telegram.telegramflow.xml.screensdescriptor;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

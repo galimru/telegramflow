@@ -24,10 +24,10 @@ import org.telegram.telegramflow.services.defaults.DefaultInitialScreenProvider;
 import org.telegram.telegramflow.services.defaults.DefaultMessageProvider;
 import org.telegram.telegramflow.services.defaults.DefaultScreenRegistry;
 import org.telegram.telegramflow.utils.TelegramUtil;
-import org.telegram.telegramflow.xml.screens.definition.ButtonDefinition;
-import org.telegram.telegramflow.xml.screens.definition.ButtonRowDefinition;
-import org.telegram.telegramflow.xml.screens.definition.MessageDefinition;
-import org.telegram.telegramflow.xml.screens.definition.ScreenDefinition;
+import org.telegram.telegramflow.xml.screendefinition.ButtonDefinition;
+import org.telegram.telegramflow.xml.screendefinition.ButtonRowDefinition;
+import org.telegram.telegramflow.xml.screendefinition.MessageDefinition;
+import org.telegram.telegramflow.xml.screendefinition.ScreenDefinition;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

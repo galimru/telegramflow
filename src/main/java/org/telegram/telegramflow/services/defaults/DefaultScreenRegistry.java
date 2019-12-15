@@ -4,11 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegramflow.exceptions.ScreenRegistryException;
 import org.telegram.telegramflow.services.ScreenRegistry;
-import org.telegram.telegramflow.xml.screens.definition.ButtonDefinition;
-import org.telegram.telegramflow.xml.screens.definition.ButtonRowDefinition;
-import org.telegram.telegramflow.xml.screens.definition.ScreenDefinition;
-import org.telegram.telegramflow.xml.screens.descriptor.ScreenIndex;
-import org.telegram.telegramflow.xml.screens.descriptor.ScreensDescriptor;
+import org.telegram.telegramflow.xml.screendefinition.ButtonDefinition;
+import org.telegram.telegramflow.xml.screendefinition.ButtonRowDefinition;
+import org.telegram.telegramflow.xml.screendefinition.ScreenDefinition;
+import org.telegram.telegramflow.xml.screensdescriptor.ScreenIndex;
+import org.telegram.telegramflow.xml.screensdescriptor.ScreensDescriptor;
 
 import javax.annotation.Nonnull;
 import javax.xml.bind.JAXBContext;

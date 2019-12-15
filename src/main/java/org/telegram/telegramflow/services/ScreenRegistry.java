@@ -1,7 +1,7 @@
 package org.telegram.telegramflow.services;
 
 import org.telegram.telegramflow.exceptions.ScreenRegistryException;
-import org.telegram.telegramflow.xml.screens.definition.ScreenDefinition;
+import org.telegram.telegramflow.xml.screendefinition.ScreenDefinition;
 
 import javax.annotation.Nonnull;
 

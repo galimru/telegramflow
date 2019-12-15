@@ -1,4 +1,4 @@
-package org.telegram.telegramflow.xml.screens.definition;
+package org.telegram.telegramflow.xml.screendefinition;
 
 import org.telegram.telegramflow.objects.FormatType;
 
