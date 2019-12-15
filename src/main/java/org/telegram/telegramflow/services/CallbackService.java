@@ -1,8 +1,9 @@
-package org.telegram.telegramflow.handlers;
+package org.telegram.telegramflow.services;
 
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegramflow.TelegramFlow;
 import org.telegram.telegramflow.exceptions.ProcessException;
+import org.telegram.telegramflow.handlers.CallbackAction;
+import org.telegram.telegramflow.handlers.UpdateHandler;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
@@ -15,23 +16,21 @@ public class CallbackService {
 
     private Map<String, CallbackAction> actions = new ConcurrentHashMap<>();
 
-    private TelegramFlow telegramFlow;
-
-    public CallbackService register(String key, CallbackAction action) {
-        Objects.requireNonNull(key, "key is null");
+    public CallbackService register(String actionId, CallbackAction action) {
+        Objects.requireNonNull(actionId, "actionId is null");
         Objects.requireNonNull(action, "action is null");
 
-        actions.put(key, action);
+        actions.put(actionId, action);
         return this;
     }
 
     @Nonnull
-    public CallbackAction get(@Nonnull String key) throws ProcessException {
-        Objects.requireNonNull(actions, "key is null");
+    public CallbackAction get(@Nonnull String actionId) throws ProcessException {
+        Objects.requireNonNull(actions, "actionId is null");
 
-        CallbackAction action = actions.get(key);
+        CallbackAction action = actions.get(actionId);
         if (action == null) {
-            throw new ProcessException(String.format("Callback action '%s' is not registered", key));
+            throw new ProcessException(String.format("Callback action '%s' is not registered", actionId));
         }
         return action;
     }
@@ -51,10 +50,10 @@ public class CallbackService {
             String data = update.getCallbackQuery().getData();
             String[] tokens = data.split(DELIMITER);
 
-            String key = tokens[0];
+            String actionId = tokens[0];
             String value = tokens.length == 2 ? tokens[1] : null;
 
-            get(key).execute(update, value);
+            get(actionId).execute(update, value);
         }
     }
 }

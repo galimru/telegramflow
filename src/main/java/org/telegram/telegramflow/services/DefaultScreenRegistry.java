@@ -1,9 +1,8 @@
-package org.telegram.telegramflow.services.defaults;
+package org.telegram.telegramflow.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegramflow.exceptions.ScreenRegistryException;
-import org.telegram.telegramflow.services.ScreenRegistry;
 import org.telegram.telegramflow.xml.screendefinition.ButtonDefinition;
 import org.telegram.telegramflow.xml.screendefinition.ButtonRowDefinition;
 import org.telegram.telegramflow.xml.screendefinition.ScreenDefinition;

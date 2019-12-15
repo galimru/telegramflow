@@ -5,7 +5,7 @@ import org.telegram.telegramflow.handlers.CallbackAction;
 
 public class HelpCallbackAction extends CallbackAction {
 
-    public static final String KEY = "HELP";
+    public static final String ACTION_ID = "HELP";
 
     @Override
     public void execute(Update update, String value) {

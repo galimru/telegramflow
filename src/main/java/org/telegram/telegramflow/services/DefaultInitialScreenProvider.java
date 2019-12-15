@@ -1,7 +1,6 @@
-package org.telegram.telegramflow.services.defaults;
+package org.telegram.telegramflow.services;
 
 import org.telegram.telegramflow.objects.TelegramUser;
-import org.telegram.telegramflow.services.InitialScreenProvider;
 
 import javax.annotation.Nonnull;
 
