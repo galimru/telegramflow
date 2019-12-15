@@ -95,6 +95,14 @@ public class TelegramFlow {
         authenticator.setTelegramBot(telegramBot);
         authenticator.setMessageProvider(messageProvider);
 
+        if (defaultInputHandler != null) {
+            defaultInputHandler.setTelegramFlow(this);
+        }
+
+        if (defaultCallbackHandler != null) {
+            defaultCallbackHandler.setTelegramFlow(this);
+        }
+
         initialized = true;
 
         return this;
@@ -279,6 +287,7 @@ public class TelegramFlow {
             try {
                 Constructor constructor = handlerClass.getConstructor();
                 handler = (UpdateHandler) constructor.newInstance();
+                handler.setTelegramFlow(this);
                 cachedHandlers.put(handlerClass, handler);
             } catch (InstantiationException | InvocationTargetException
                     | IllegalAccessException | NoSuchMethodException e) {
@@ -314,6 +323,7 @@ public class TelegramFlow {
             try {
                 Constructor constructor = actionClass.getConstructor();
                 action = (KeyboardAction) constructor.newInstance();
+                action.setTelegramFlow(this);
                 cachedActions.put(actionClass, action);
             } catch (InstantiationException | InvocationTargetException
                     | IllegalAccessException | NoSuchMethodException e) {
