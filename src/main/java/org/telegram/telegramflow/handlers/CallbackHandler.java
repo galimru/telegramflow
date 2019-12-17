@@ -4,7 +4,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegramflow.TelegramFlow;
 import org.telegram.telegramflow.exceptions.ProcessException;
 
-public abstract class CallbackAction {
+public abstract class CallbackHandler {
 
     protected TelegramFlow telegramFlow;
 
@@ -12,5 +12,5 @@ public abstract class CallbackAction {
         this.telegramFlow = telegramFlow;
     }
 
-    public abstract void execute(Update update, String value) throws ProcessException;
+    public abstract void handle(Update update, String value) throws ProcessException;
 }

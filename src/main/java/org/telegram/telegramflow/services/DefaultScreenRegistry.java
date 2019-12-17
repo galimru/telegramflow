@@ -143,7 +143,7 @@ public class DefaultScreenRegistry implements ScreenRegistry {
 
         if (button instanceof ButtonDefinition) {
             ButtonDefinition definition = (ButtonDefinition) button;
-            if (definition.getTransitTo() == null && definition.getAction() == null) {
+            if (definition.getTransitTo() == null && definition.getHandlerClass() == null) {
                 throw new ScreenRegistryException(String
                         .format("At least one property transitTo or action must be defined [button: %s]",
                                 definition.getName()));

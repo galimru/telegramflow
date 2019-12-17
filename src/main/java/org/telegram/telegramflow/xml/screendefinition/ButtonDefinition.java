@@ -1,6 +1,6 @@
 package org.telegram.telegramflow.xml.screendefinition;
 
-import org.telegram.telegramflow.handlers.KeyboardAction;
+import org.telegram.telegramflow.handlers.UpdateHandler;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -15,8 +15,8 @@ public class ButtonDefinition {
     @XmlAttribute(name = "transitTo")
     private String transitTo;
 
-    @XmlAttribute(name = "action")
-    private Class<? extends KeyboardAction> action;
+    @XmlAttribute(name = "handler")
+    private Class<? extends UpdateHandler> handlerClass;
 
     public String getName() {
         return name;
@@ -34,11 +34,11 @@ public class ButtonDefinition {
         this.transitTo = transitTo;
     }
 
-    public Class<? extends KeyboardAction> getAction() {
-        return action;
+    public Class<? extends UpdateHandler> getHandlerClass() {
+        return handlerClass;
     }
 
-    public void setAction(Class<? extends KeyboardAction> action) {
-        this.action = action;
+    public void setHandlerClass(Class<? extends UpdateHandler> handlerClass) {
+        this.handlerClass = handlerClass;
     }
 }

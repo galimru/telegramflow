@@ -5,6 +5,6 @@
     <callback handler="org.telegram.telegramflow.handlers.FullspecCallbackHandler"/>
     <keyboard>
         <button name="test" transitTo="default"/>
-        <button name="test2" action="org.telegram.telegramflow.actions.FullspecAction"/>
+        <button name="test2" handler="org.telegram.telegramflow.actions.FullspecAction"/>
     </keyboard>
 </screen>

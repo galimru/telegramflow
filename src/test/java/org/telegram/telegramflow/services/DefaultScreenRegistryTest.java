@@ -39,7 +39,7 @@ public class DefaultScreenRegistryTest {
         assertEquals(2, definition.getButtons().size());
         assertNotNull(((ButtonDefinition)definition.getButtons().get(0)).getName());
         assertNotNull(((ButtonDefinition)definition.getButtons().get(0)).getTransitTo());
-        assertNotNull(((ButtonDefinition)definition.getButtons().get(1)).getAction());
+        assertNotNull(((ButtonDefinition)definition.getButtons().get(1)).getHandlerClass());
     }
 
 }

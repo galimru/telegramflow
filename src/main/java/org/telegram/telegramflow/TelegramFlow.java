@@ -14,15 +14,11 @@ import org.telegram.telegramflow.exceptions.AuthenticationException;
 import org.telegram.telegramflow.exceptions.InitializationException;
 import org.telegram.telegramflow.exceptions.ProcessException;
 import org.telegram.telegramflow.exceptions.ScreenRegistryException;
-import org.telegram.telegramflow.handlers.KeyboardAction;
 import org.telegram.telegramflow.handlers.UpdateHandler;
 import org.telegram.telegramflow.objects.TelegramUser;
 import org.telegram.telegramflow.security.AnonymousAuthenticator;
 import org.telegram.telegramflow.security.Authenticator;
 import org.telegram.telegramflow.services.*;
-import org.telegram.telegramflow.services.DefaultInitialScreenProvider;
-import org.telegram.telegramflow.services.DefaultMessageProvider;
-import org.telegram.telegramflow.services.DefaultScreenRegistry;
 import org.telegram.telegramflow.utils.TelegramUtil;
 import org.telegram.telegramflow.xml.screendefinition.ButtonDefinition;
 import org.telegram.telegramflow.xml.screendefinition.ButtonRowDefinition;
@@ -56,8 +52,6 @@ public class TelegramFlow {
     private UpdateHandler defaultCallbackHandler = null;
 
     private final Map<Class<? extends UpdateHandler>, UpdateHandler> cachedHandlers = new ConcurrentHashMap<>();
-
-    private final Map<Class<? extends KeyboardAction>, KeyboardAction> cachedActions = new ConcurrentHashMap<>();
 
     @Nonnull
     public TelegramFlow configure() {
@@ -299,36 +293,11 @@ public class TelegramFlow {
         Objects.requireNonNull(update, "update is null");
         Objects.requireNonNull(button, "button is null");
 
-        if (button.getAction() != null) {
-            invokeAction(update, button.getAction());
+        if (button.getHandlerClass() != null) {
+            invokeHandler(update, button.getHandlerClass());
         } else if (button.getTransitTo() != null) {
             transitTo(button.getTransitTo());
         }
-    }
-
-    private void invokeAction(Update update, Class<? extends KeyboardAction> actionClass) throws ProcessException {
-        Objects.requireNonNull(update, "update is null");
-        Objects.requireNonNull(actionClass, "actionClass is null");
-
-        TelegramUser user = authenticator.getUser();
-
-        logger.info("Invoking action {} by user {}", actionClass.getSimpleName(), user.getUsername());
-
-        KeyboardAction action;
-        if (cachedActions.containsKey(actionClass)) {
-            action = cachedActions.get(actionClass);
-        } else {
-            try {
-                Constructor constructor = actionClass.getConstructor();
-                action = (KeyboardAction) constructor.newInstance();
-                action.setTelegramFlow(this);
-                cachedActions.put(actionClass, action);
-            } catch (InstantiationException | InvocationTargetException
-                    | IllegalAccessException | NoSuchMethodException e) {
-                throw new ProcessException("Cannot invoke action " + actionClass.getName(), e);
-            }
-        }
-        action.execute(update);
     }
 
     private Map<String, ButtonDefinition> getButtons(ScreenDefinition screen) {
