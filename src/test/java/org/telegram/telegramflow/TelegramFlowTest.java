@@ -52,7 +52,7 @@ public class TelegramFlowTest {
                 .initialize();
 
         when(userService.find(any())).thenReturn(null);
-        when(userService.create()).then(i -> {
+        when(userService.create(any())).then(i -> {
             TelegramUser user = new DummyUser();
             user.setAuthState(AuthState.AUTHORIZED);
             user.setActiveScreen("default");

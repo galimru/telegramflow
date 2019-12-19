@@ -63,7 +63,7 @@ public class PasswordAuthenticatorTest {
     @Test
     public void shouldSendAuthorizeMessageForUnauthorizedUser() throws IOException, TelegramApiException {
         when(userService.find(any())).thenReturn(null);
-        when(userService.create()).thenReturn(new DummyUser());
+        when(userService.create(any())).thenReturn(new DummyUser());
         when(messageProvider.getMessage(any())).thenAnswer(i -> i.getArguments()[0]);
 
         Update update = JsonUtil.fromFile("/json/update_start.json");
@@ -80,7 +80,7 @@ public class PasswordAuthenticatorTest {
 
     @Test
     public void shouldSendLoginRequestAfterPressingAuthorize() throws IOException, TelegramApiException {
-        when(userService.create()).thenReturn(new DummyUser());
+        when(userService.create(any())).thenReturn(new DummyUser());
         when(messageProvider.getMessage(any())).thenAnswer(i -> i.getArguments()[0]);
 
         Update update = JsonUtil.fromFile("/json/update_press_authorize.json");
@@ -176,7 +176,7 @@ public class PasswordAuthenticatorTest {
     @Test
     public void shouldReturnUserForAuthorizedUser() throws IOException, TelegramApiException, AuthenticationException {
         when(userService.find(any())).thenReturn(null);
-        when(userService.create()).then(i -> {
+        when(userService.create(any())).then(i -> {
             TelegramUser user = new DummyUser();
             user.setAuthState(AuthState.AUTHORIZED);
             user.setRole(DummyRole.USER);

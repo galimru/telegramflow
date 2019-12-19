@@ -43,7 +43,7 @@ public abstract class PasswordAuthenticator extends AbstractAuthenticator {
     public TelegramUser authorize(@Nonnull Update update) throws AuthenticationException {
         Objects.requireNonNull(update, "update is null");
 
-        TelegramUser user = retrieveUser(TelegramUtil.extractFrom(update));
+        TelegramUser user = retrieveUser(update);
 
         if (user.getAuthState() == null) {
             String text = TelegramUtil.extractText(update);
@@ -114,13 +114,17 @@ public abstract class PasswordAuthenticator extends AbstractAuthenticator {
     @Nullable
     protected abstract TelegramRole login(@Nonnull Credentials credentials) throws AuthenticationException;
 
-    protected TelegramUser retrieveUser(org.telegram.telegrambots.meta.api.objects.User telegramUser) {
+    protected TelegramUser retrieveUser(Update update) {
+        Objects.requireNonNull(update, "update is null");
+
+        org.telegram.telegrambots.meta.api.objects.User telegramUser = TelegramUtil.extractFrom(update);
+
         Objects.requireNonNull(telegramUser, "telegramUser is null");
 
         TelegramUser user = userService.find(String.valueOf(telegramUser.getId()));
 
         if (user == null) {
-            user = userService.create();
+            user = userService.create(update);
             user.setUserId(String.valueOf(telegramUser.getId()));
             user.setUsername(telegramUser.getUserName());
             user.setFirstName(telegramUser.getFirstName());

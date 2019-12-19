@@ -1,5 +1,6 @@
 package org.telegram.telegramflow.services;
 
+import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegramflow.objects.TelegramRole;
 import org.telegram.telegramflow.objects.TelegramUser;
 
@@ -9,7 +10,7 @@ import javax.annotation.Nullable;
 public interface UserService {
 
     @Nonnull
-    TelegramUser create();
+    TelegramUser create(Update update);
 
     @Nullable
     TelegramUser find(@Nonnull String userId);

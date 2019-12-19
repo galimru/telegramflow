@@ -44,7 +44,7 @@ public class AnonymousAuthenticator extends AbstractAuthenticator {
     public TelegramUser authorize(@Nonnull Update update) throws AuthenticationException {
         Objects.requireNonNull(update, "update is null");
 
-        TelegramUser user = retrieveUser(TelegramUtil.extractFrom(update));
+        TelegramUser user = retrieveUser(update);
 
         if (user.getAuthState() != AuthState.AUTHORIZED) {
             throw new AuthenticationException(String.format("User %s is not authorized", user.getUsername()));
@@ -57,13 +57,17 @@ public class AnonymousAuthenticator extends AbstractAuthenticator {
         return user;
     }
 
-    protected TelegramUser retrieveUser(org.telegram.telegrambots.meta.api.objects.User telegramUser) {
+    protected TelegramUser retrieveUser(Update update) {
+        Objects.requireNonNull(update, "update is null");
+
+        org.telegram.telegrambots.meta.api.objects.User telegramUser = TelegramUtil.extractFrom(update);
+
         Objects.requireNonNull(telegramUser, "telegramUser is null");
 
         TelegramUser user = userService.find(String.valueOf(telegramUser.getId()));
 
         if (user == null) {
-            user = userService.create();
+            user = userService.create(update);
             user.setUserId(String.valueOf(telegramUser.getId()));
             user.setUsername(telegramUser.getUserName());
             user.setFirstName(telegramUser.getFirstName());

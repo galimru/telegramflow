@@ -47,7 +47,7 @@ public class AnonymousAuthenticatorTest {
     @Test
     public void shouldReturnUserForNewUser() throws IOException, AuthenticationException {
         when(userService.find(any())).thenReturn(null);
-        when(userService.create()).thenReturn(new DummyUser());
+        when(userService.create(any())).thenReturn(new DummyUser());
 
         Update update = JsonUtil.fromFile("/json/update_start.json");
 
@@ -59,7 +59,7 @@ public class AnonymousAuthenticatorTest {
     @Test
     public void shouldReturnUserForAuthorizedUser() throws IOException, AuthenticationException {
         when(userService.find(any())).thenReturn(null);
-        when(userService.create()).then(i -> {
+        when(userService.create(any())).then(i -> {
             TelegramUser user = new DummyUser();
             user.setAuthState(AuthState.AUTHORIZED);
             user.setRole(DummyRole.USER);
