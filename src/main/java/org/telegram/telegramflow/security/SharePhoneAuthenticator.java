@@ -90,7 +90,7 @@ public class SharePhoneAuthenticator extends AbstractAuthenticator {
         startAuthorizationProcess(user);
     }
 
-    private void assignRole(TelegramUser user) throws AuthenticationException {
+    protected void assignRole(TelegramUser user) throws AuthenticationException {
         Objects.requireNonNull(user, "user is null");
 
         TelegramRole role = userService.retrieveRole(user);
@@ -109,7 +109,7 @@ public class SharePhoneAuthenticator extends AbstractAuthenticator {
         logger.info("Role {} matched and assigned to user {}", role, user.getUsername());
     }
 
-    private TelegramUser retrieveUser(org.telegram.telegrambots.meta.api.objects.User telegramUser) {
+    protected TelegramUser retrieveUser(org.telegram.telegrambots.meta.api.objects.User telegramUser) {
         Objects.requireNonNull(telegramUser, "telegramUser is null");
 
         TelegramUser user = userService.find(String.valueOf(telegramUser.getId()));
@@ -126,7 +126,7 @@ public class SharePhoneAuthenticator extends AbstractAuthenticator {
         return user;
     }
 
-    private void startAuthorizationProcess(TelegramUser user) {
+    protected void startAuthorizationProcess(TelegramUser user) {
         Objects.requireNonNull(user, "user is null");
 
         user.setAuthState(AuthState.AUTHORIZATION);
@@ -134,7 +134,7 @@ public class SharePhoneAuthenticator extends AbstractAuthenticator {
         sendAuthorizationRequest(user);
     }
 
-    private void sendAuthorizationRequest(TelegramUser user) {
+    protected void sendAuthorizationRequest(TelegramUser user) {
         Objects.requireNonNull(user, "user is null");
 
         KeyboardRow keyboardRow = new KeyboardRow();
@@ -154,7 +154,7 @@ public class SharePhoneAuthenticator extends AbstractAuthenticator {
         }
     }
 
-    private void completeAuthorizationProcess(TelegramUser user) {
+    protected void completeAuthorizationProcess(TelegramUser user) {
         Objects.requireNonNull(user, "user is null");
 
         user.setAuthState(AuthState.AUTHORIZED);

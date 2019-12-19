@@ -57,7 +57,7 @@ public class AnonymousAuthenticator extends AbstractAuthenticator {
         return user;
     }
 
-    private TelegramUser retrieveUser(org.telegram.telegrambots.meta.api.objects.User telegramUser) {
+    protected TelegramUser retrieveUser(org.telegram.telegrambots.meta.api.objects.User telegramUser) {
         Objects.requireNonNull(telegramUser, "telegramUser is null");
 
         TelegramUser user = userService.find(String.valueOf(telegramUser.getId()));

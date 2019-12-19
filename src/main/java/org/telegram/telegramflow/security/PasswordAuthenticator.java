@@ -114,7 +114,7 @@ public abstract class PasswordAuthenticator extends AbstractAuthenticator {
     @Nullable
     protected abstract TelegramRole login(@Nonnull Credentials credentials) throws AuthenticationException;
 
-    private TelegramUser retrieveUser(org.telegram.telegrambots.meta.api.objects.User telegramUser) {
+    protected TelegramUser retrieveUser(org.telegram.telegrambots.meta.api.objects.User telegramUser) {
         Objects.requireNonNull(telegramUser, "telegramUser is null");
 
         TelegramUser user = userService.find(String.valueOf(telegramUser.getId()));
@@ -131,14 +131,14 @@ public abstract class PasswordAuthenticator extends AbstractAuthenticator {
         return user;
     }
 
-    private void startAuthorizationProcess(TelegramUser user) {
+    protected void startAuthorizationProcess(TelegramUser user) {
         Objects.requireNonNull(user, "user is null");
 
         user.setAuthState(AuthState.AUTHORIZATION);
         userService.save(user);
     }
 
-    private void sendAuthorizationRequest(TelegramUser user, String message) {
+    protected void sendAuthorizationRequest(TelegramUser user, String message) {
         Objects.requireNonNull(user, "user is null");
 
         KeyboardRow keyboardRow = new KeyboardRow();
@@ -157,7 +157,7 @@ public abstract class PasswordAuthenticator extends AbstractAuthenticator {
         }
     }
 
-    private void sendLoginRequest(TelegramUser user) {
+    protected void sendLoginRequest(TelegramUser user) {
         Objects.requireNonNull(user, "user is null");
 
         try {
@@ -171,7 +171,7 @@ public abstract class PasswordAuthenticator extends AbstractAuthenticator {
         }
     }
 
-    private void sendPasswordRequest(TelegramUser user) {
+    protected void sendPasswordRequest(TelegramUser user) {
         Objects.requireNonNull(user, "user is null");
 
         try {
@@ -185,7 +185,7 @@ public abstract class PasswordAuthenticator extends AbstractAuthenticator {
         }
     }
 
-    private void sendInvalidMessage(TelegramUser user) {
+    protected void sendInvalidMessage(TelegramUser user) {
         Objects.requireNonNull(user, "user is null");
 
         try {
@@ -198,7 +198,7 @@ public abstract class PasswordAuthenticator extends AbstractAuthenticator {
         }
     }
 
-    private void completeAuthorizationProcess(TelegramUser user) {
+    protected void completeAuthorizationProcess(TelegramUser user) {
         Objects.requireNonNull(user, "user is null");
 
         user.setAuthState(AuthState.AUTHORIZED);
@@ -211,7 +211,7 @@ public abstract class PasswordAuthenticator extends AbstractAuthenticator {
         }
     }
 
-    private void interruptAuthorizationProcess(TelegramUser user) {
+    protected void interruptAuthorizationProcess(TelegramUser user) {
         Objects.requireNonNull(user, "user is null");
 
         user.setAuthState(null);
